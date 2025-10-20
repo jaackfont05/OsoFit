@@ -11,4 +11,10 @@ public class user {
         this.userN = "";
         this.password = "";
     }
+    public String getUserN() {
+        return userN;
+    }
+    public String getPassword() {
+        return password;
+    }
 }
