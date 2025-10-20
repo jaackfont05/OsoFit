@@ -8,7 +8,7 @@ import java.util.List;
  * UC1 Log Workout Session
  * UC3 Edit/Delete Workout Entry
  */
-public class workoutmanager {
+public class WorkoutManager {
     private List<Workout> workouts = new ArrayList<>();
     private int nextId = 1;
 

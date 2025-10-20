@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
  * Connor Griffin - Workout entity class
  * Represents one logged workout session.
  */
-public class workout {
+public class Workout {
     private int workoutId;
     private String userId;
     private String type;
