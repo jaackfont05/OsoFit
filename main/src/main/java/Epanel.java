@@ -11,11 +11,11 @@ public class Epanel extends JPanel{
         super();
         //this.setBounds(0,0,400,400);
         this.setLayout(new FlowLayout());
-        JTextField weightF = new JTextField("weight: ", 10);
-        JTextField equipmentF = new JTextField("equipment: ", 35);
-        JTextField setsF = new JTextField("sets: ", 10);
-        JTextField repsF = new JTextField("reps: ", 10);
-        JTextField nameF = new JTextField("name: ", 20);
+        JTextField weightF = new JTextField("Weight: ", 10);
+        JTextField equipmentF = new JTextField("Equipment: ", 35);
+        JTextField setsF = new JTextField("Sets: ", 10);
+        JTextField repsF = new JTextField("Reps: ", 10);
+        JTextField nameF = new JTextField("Name: ", 20);
 
         this.add(nameF);
         this.add(equipmentF);
