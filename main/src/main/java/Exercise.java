@@ -23,4 +23,15 @@ public class Exercise {
     private void setID(){
         exerciseID = Objects.hash(name,weight,equipment,sets,reps);
     }
+
+    public String toString(){
+        StringBuilder sb = new StringBuilder();
+        sb.append(name + '\n');
+        sb.append(equipment);
+        sb.append('\n');
+        sb.append(weight + '\n');
+        sb.append(sets + '\n');
+        sb.append(reps + '\n');
+        return sb.toString();
+    }
 }

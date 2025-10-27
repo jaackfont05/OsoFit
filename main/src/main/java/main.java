@@ -3,6 +3,7 @@ import java.io.*;
 
 public class main {
     static JFrame frame;
+
     public static void main(String[] args) {
         frame = new JFrame();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -12,6 +13,6 @@ public class main {
 
         Ebutton e = new Ebutton();
         frame.add(e);
-        Exercise ex = e.getExercise();
+
     }
 }

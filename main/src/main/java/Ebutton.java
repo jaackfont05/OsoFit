@@ -11,14 +11,18 @@ public class Ebutton extends JButton{
 
         this.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
+                main.frame.remove(Ebutton.this);
                 Epanel panel = new Epanel();
                 panel.setVisible(true);
                 panel.setBounds(0,0,400,400);
                 exercise = panel.getExercise();
                 main.frame.add(panel);
                 main.frame.setVisible(true);
+                main.frame.revalidate();
+                main.frame.repaint();
             }
         });
+
     }
 
 

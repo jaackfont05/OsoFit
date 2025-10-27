@@ -31,9 +31,21 @@ public class Epanel extends JPanel{
             public void actionPerformed(ActionEvent e){
                 exercise.name = nameF.getText();
                 exercise.equipment = equipmentF.getText();
-                exercise.weight = Integer.parseInt(weightF.getText());
-                exercise.reps = Integer.parseInt(repsF.getText());
-                exercise.sets = Integer.parseInt(setsF.getText());
+                StringBuilder sb = new StringBuilder();
+                sb.append(weightF.getText());
+                sb.delete(0, 8);
+                exercise.weight = Integer.parseInt(sb.toString());
+                sb = new StringBuilder();
+                sb.append(repsF.getText());
+                sb.delete(0, 6);
+                exercise.reps = Integer.parseInt(sb.toString());
+                sb = new StringBuilder();
+                sb.append(setsF.getText());
+                sb.delete(0, 6);
+                exercise.sets = Integer.parseInt(sb.toString());
+
+                String s = exercise.toString();
+                System.out.println(s);
             }
         });
     }
