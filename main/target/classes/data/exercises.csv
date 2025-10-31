@@ -1,0 +1,11 @@
+ExerciseID,Name,Type,MuscleGroup,Equipment,Duration(min),Calories,Level,Description
+1,Push-Up,Strength,Chest,None,5,40,Beginner,Classic bodyweight exercise for upper body strength.
+2,Jogging,Cardio,Full Body,None,30,200,Beginner,Light jogging improves endurance and cardiovascular health.
+3,Squat,Strength,Legs,None,10,70,Intermediate,Bodyweight squat focusing on legs and glutes.
+4,Bench Press,Strength,Chest,Barbell,15,120,Intermediate,Press barbell to build pectoral and triceps strength.
+5,Deadlift,Strength,Back,Barbell,20,180,Advanced,Full-body lift developing posterior chain muscles.
+6,Plank,Core,Abs,None,5,25,Beginner,Hold a straight body position to build core stability.
+7,Cycling,Cardio,Legs,Bicycle,45,350,Intermediate,Improves lower-body strength and stamina.
+8,Jump Rope,Cardio,Full Body,Rope,10,120,Beginner,Quick cardio routine for coordination and endurance.
+9,Pull-Up,Strength,Back,Pull-up Bar,10,80,Advanced,Upper body strength exercise using body weight.
+10,Yoga Stretch,Flexibility,Full Body,None,20,60,Beginner,Full-body flexibility and relaxation sequence.
