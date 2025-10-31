@@ -88,7 +88,11 @@ public class forgetPasswordPage extends JFrame {
         JButton cancel = outlinedButton("Cancel", new Color(200, 40, 40));
 
         verify.addActionListener(this::onVerify);
-        cancel.addActionListener(e -> dispose());
+        cancel.addActionListener(e -> {
+            dispose();
+            new loginPage().setVisible(true);
+        });
+
 
         p.add(verify);
         p.add(cancel);
