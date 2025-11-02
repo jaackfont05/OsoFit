@@ -45,6 +45,13 @@ public class menuBar extends JPanel {
         addExerciseBtn.addActionListener(e -> {
             //add your customized actionListener, don't forget
             //check whether to dispose current page/ui if needed
+            if(owner instanceof exercisePage) {
+                owner.toFront();
+                owner.requestFocus();
+                return;
+            }
+            if (owner != null) owner.dispose();
+            new exercisePage(currentUser).setVisible(true);
         });
         //!!!add your actionListener for your own button here
 
