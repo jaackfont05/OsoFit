@@ -103,4 +103,33 @@ public class MySQLDatabaseConnector {
         }
         return null;
     }
+
+    public boolean verifyUser(String email, String city, String anim) throws SQLException{
+        String query = "SELECT * FROM userInfo WHERE email = ? AND city = ? AND animal = ?";
+        try (Connection connection = getConnection()) {
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, email);
+            preparedStatement.setString(2, city);
+            preparedStatement.setString(3, anim);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                return resultSet.next();
+            }
+        } catch (SQLException e) {
+
+        }
+        return false;
+    }
+
+    public boolean updatePass(String email, String pass) throws SQLException {
+        String query = "UPDATE userInfo SET _password = ? WHERE email = ?";
+        try (Connection connection = getConnection()) {
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, pass);
+            preparedStatement.setString(2, email);
+            int rows = preparedStatement.executeUpdate();
+            return rows > 0;
+        }catch (SQLException e) {}
+
+        return false;
+    }
 }

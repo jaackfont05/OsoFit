@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -118,14 +119,19 @@ public class forgetPasswordPage extends JFrame {
             } else {
                 alert("Verification failed. Please check your answers.");
             }
-        } catch (IOException ex) {
+        } catch (SQLException ex) {
             alert("Error verifying account:\n" + ex.getMessage());
         }
     }
 
     //update for database
 
-    private boolean verifyUser(String email, String city, String animal) throws IOException {
+    private boolean verifyUser(String email, String city, String animal) throws SQLException{
+        try {
+            return db.verifyUser(email, city, animal);
+        }catch (SQLException ex) {
+            alert("An account with that info does not exist.");
+        }
         return false;
     }
 
@@ -167,7 +173,7 @@ public class forgetPasswordPage extends JFrame {
                 dialog.dispose();
                 dispose();
                 new loginPage(db).setVisible(true);
-            } catch (IOException ex) {
+            } catch (SQLException ex) {
                 alert("Failed to reset password:\n" + ex.getMessage());
             }
         });
@@ -181,8 +187,12 @@ public class forgetPasswordPage extends JFrame {
     }
 
     //update for database
-    private void updatePassword(String email, String newPass) throws IOException {
-
+    private void updatePassword(String email, String newPass) throws SQLException {
+        try{
+            db.updatePass(email, newPass);
+        }catch(SQLException e){
+            alert("Password could not be updated.");
+        }
     }
 
     // --- UI helpers ---
