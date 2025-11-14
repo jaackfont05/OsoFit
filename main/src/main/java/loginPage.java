@@ -1,4 +1,3 @@
-
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -14,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.SQLException;
 
 
 public class loginPage extends JFrame {
@@ -22,6 +22,7 @@ public class loginPage extends JFrame {
     private static final String LEFT_IMG_PATH  = IMG_DIR + "bear.png";
     private static final String RIGHT_IMG_PATH = IMG_DIR + "bu.png";
     private static final String USERS_CSV = "main/src/main/resources/data/userInformation.csv";
+    private MySQLDatabaseConnector db;
 
 
     // rescale picture so that can show them perfectly
@@ -29,7 +30,8 @@ public class loginPage extends JFrame {
     private JLabel leftLabel, rightLabel;
     private JPanel west, east;
 
-    public loginPage() {
+    public loginPage(MySQLDatabaseConnector db) {
+        this.db = db;
         defaultSettings.setDefault(this);
         setTitle("OsoFit — Login");
 
@@ -163,7 +165,7 @@ public class loginPage extends JFrame {
                 dispose();
                 new mainPage(u).setVisible(true);
 
-            } catch (IOException ex) {
+            } catch (SQLException ex) {
                 JOptionPane.showMessageDialog(this,
                         "Error reading user data:\n" + ex.getMessage(),
                         "Login error",
@@ -174,13 +176,13 @@ public class loginPage extends JFrame {
 
         forgotBtn.addActionListener(e -> {
             dispose(); // may need to close login page or not, we can discuss later
-            new forgetPasswordPage().setVisible(true);
+            new forgetPasswordPage(db).setVisible(true);
         });
 
 
         createBtn.addActionListener(e -> {
             dispose(); // ditto
-            new createAccountPage().setVisible(true);
+            new createAccountPage(db).setVisible(true);
         });
 
         // Load and scale side images helper, this part is kind tricky, recommend you to google how to insert
@@ -282,40 +284,18 @@ public class loginPage extends JFrame {
         return b;
     }
 
-    private user authenticate(String email, String password) throws IOException {
-        Path p = Paths.get(USERS_CSV);
-        if (!Files.exists(p)) return null;
-
-        try (BufferedReader br = Files.newBufferedReader(p, StandardCharsets.UTF_8)) {
-            String line;
-            boolean header = true;
-            while ((line = br.readLine()) != null) {
-                if (line.trim().isEmpty()) continue;
-
-                // Skip header if present
-                if (header) {
-                    header = false;
-                    if (line.toLowerCase().startsWith("username,email,password,")) {
-                        continue;
-                    }
-                }
-
-                String[] cols = line.split(",", -1);
-                if (cols.length < 6) continue;
-
-                String usernameCol = cols[0].trim();
-                String emailCol    = cols[1].trim();
-                String passCol     = cols[2].trim();
-                String cityCol     = cols[3].trim();
-                String animalCol   = cols[4].trim();
-                String roleCol     = cols[5].trim();
-
-                if (emailCol.equalsIgnoreCase(email) && passCol.equals(password)) { // if verify successfully
-                    return new user(usernameCol, emailCol, passCol, cityCol, animalCol, roleCol);
-                    //superclass user used as a flag to identify its specific functionalities and its own database information.
-                }
+    private user authenticate(String email, String password) throws SQLException{
+        try{
+            String[] userI = db.loginUser(email, password);
+            if(userI != null && userI.length > 0){
+                user res = new user(userI[0], userI[1], userI[2], userI[3], userI[4], userI[5]);
+                return res;
             }
+        }catch(SQLException e){
+            e.printStackTrace();
         }
+
         return null;
     }
+
 }

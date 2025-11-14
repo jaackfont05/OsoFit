@@ -1,10 +1,4 @@
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class MySQLDatabaseConnector {
 
@@ -18,7 +12,7 @@ public class MySQLDatabaseConnector {
     private static final String JDBC_URL = "jdbc:mysql://" + HOST + ":" + PORT + "/" + DATABASE_NAME +
             "?useSSL=true&serverTimezone=UTC";
 
-    public static Connection getConnection() throws SQLException {
+    private static Connection getConnection() throws SQLException {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
         } catch (ClassNotFoundException e) {
@@ -37,5 +31,76 @@ public class MySQLDatabaseConnector {
             e.printStackTrace();
         }
 
+    }
+
+    public boolean insertUser(user u) throws SQLException {
+        String query = "INSERT INTO userInfo (username, email, _password, city, animal, role) VALUES (?, ?, ?, ?, ?, ?)";
+        String userN = u.getUserN();
+        String email = u.getEmail();
+        String password = u.getPassword();
+        String city = u.getCity();
+        String animal = u.getAnimal();
+        String role = u.getRole();
+
+        try (Connection connection = getConnection()) {
+            if(userExists(u)){
+                return false;
+            }
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, userN);
+            preparedStatement.setString(2, email);
+            preparedStatement.setString(3, password);
+            preparedStatement.setString(4, city);
+            preparedStatement.setString(5, animal);
+            preparedStatement.setString(6, role);
+
+            int row = preparedStatement.executeUpdate();
+            return row > 0;
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    public boolean userExists(user u) throws SQLException {
+        String query = "SELECT * FROM userInfo WHERE email = ? OR username = ?";
+        try (Connection connection = getConnection()) {
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, u.getEmail());
+            preparedStatement.setString(2, u.getUserN());
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                return resultSet.next();
+            }
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public String[] loginUser(String email, String pass) throws SQLException {
+        String query = "SELECT username, email, _password, city, animal, role FROM userInfo WHERE email = ?";
+        try (Connection connection = getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+
+            preparedStatement.setString(1, email);
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    String storedPassword = resultSet.getString("_password");
+                    if (pass.equals(storedPassword)) { // Note: In production, use hashed passwords and secure comparison
+                        return new String[] {
+                                resultSet.getString("username"),
+                                resultSet.getString("email"),
+                                storedPassword,
+                                resultSet.getString("city"),
+                                resultSet.getString("animal"),
+                                resultSet.getString("role")
+                        };
+                    }
+                }
+            }
+        }
+        return null;
     }
 }
