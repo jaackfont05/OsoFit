@@ -8,12 +8,13 @@ import java.awt.event.ActionEvent;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
+import java.sql.SQLException;
 import java.util.regex.Pattern;
 
 public class createAccountPage extends JFrame {
 
     // this path is just temporarily used since we will use database finally
-    private static final String DATA_PATH = "main/src/main/resources/data/userInformation.csv";
+    private MySQLDatabaseConnector db = new MySQLDatabaseConnector();
     // regex utility to check email format
     private static final Pattern EMAIL_RE =
             Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}$", Pattern.CASE_INSENSITIVE);
@@ -28,7 +29,8 @@ public class createAccountPage extends JFrame {
     private JRadioButton userRb;
     private JRadioButton trainerRb;
 
-    public createAccountPage() {
+    public createAccountPage(MySQLDatabaseConnector db) {
+        this.db = db;
         // Apply defaults
         defaultSettings.setDefault(this);
         setTitle("OsoFit — Create Account");
@@ -129,7 +131,7 @@ public class createAccountPage extends JFrame {
         cancel.addActionListener(e -> {
             // Close and optionally return to login
             dispose();
-            new loginPage().setVisible(true);
+            new loginPage(db).setVisible(true);
         });
 
         // Make Enter key trigger Sign Up
@@ -170,30 +172,24 @@ public class createAccountPage extends JFrame {
             return;
         }
 
-        // 4) Email unique in CSV
-        try {
-            if (!isEmailUnique(email)) {
-                alert("This email is already registered. Please use another.");
-                return;
-            }
-        } catch (IOException ex) {
-            alert("Unable to check existing users:\n" + ex.getMessage());
-            return;
+
+        user newUser;
+        if (role.equals("Trainer")) {
+            newUser = new trainer(username, email, pass1, city, animal);
+        } else {
+            newUser = new user(username, email, pass1, city, animal, "User");
         }
 
-        // 5) Append to CSV
-        try {
-            user newUser;
-            if (role.equals("Trainer")) {
-                newUser = new trainer(username, email, pass1, city, animal);
-            } else {
-                newUser = new user(username, email, pass1, city, animal, "User");
+        try{
+            boolean f = db.insertUser(newUser);
+            if(!f){
+                alert("Username or email already in use.");
+                return;
             }
-            appendUser(newUser);
-        } catch (IOException ex) {
-            alert("Failed to save account:\n" + ex.getMessage());
-            return;
+        } catch (SQLException ex) {
+            alert("Error while creating user");
         }
+
 
         JOptionPane.showMessageDialog(this,
                 "Sign up successful! You can now log in.",
@@ -201,59 +197,12 @@ public class createAccountPage extends JFrame {
 
         // Go back to login
         dispose();
-        new loginPage().setVisible(true);
+        new loginPage(db).setVisible(true);
     }
-
-    //CSV helpers
 
     private boolean isValidEmail(String email) {
         return EMAIL_RE.matcher(email).matches();
     }
-
-    private boolean isEmailUnique(String email) throws IOException {
-        Path p = Paths.get(DATA_PATH);
-        if (!Files.exists(p)) return true; // no file yet → unique
-
-        try (BufferedReader br = Files.newBufferedReader(p, StandardCharsets.UTF_8)) {
-            String line;
-            boolean hasHeader = false;
-            while ((line = br.readLine()) != null) {
-                if (line.trim().isEmpty()) continue;
-                if (!hasHeader && line.toLowerCase().startsWith("username,email,")) {
-                    hasHeader = true; // skip header
-                    continue;
-                }
-                String[] cols = line.split(",", -1);
-                if (cols.length >= 2) {
-                    String existingEmail = cols[1].trim();
-                    if (existingEmail.equalsIgnoreCase(email)) return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    private void appendUser(user newUser) throws IOException {
-        Path p = Paths.get(DATA_PATH);
-        Files.createDirectories(p.getParent());
-
-        boolean writeHeader = !Files.exists(p) || Files.size(p) == 0;
-        try (BufferedWriter bw = Files.newBufferedWriter(p, StandardCharsets.UTF_8,
-                StandardOpenOption.CREATE, StandardOpenOption.APPEND)) {
-
-            if (writeHeader) {
-                bw.write("username,email,password,city,animal,role");
-                bw.newLine();
-            }
-
-            // Use the toCsv method to write data
-            bw.write(newUser.toCsv());
-            bw.newLine();
-
-        }
-    }
-
-
 
     private String sanitize(String s) { // keep no comma to make sure well structure to store data
 
