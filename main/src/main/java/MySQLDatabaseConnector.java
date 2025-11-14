@@ -132,4 +132,22 @@ public class MySQLDatabaseConnector {
 
         return false;
     }
+
+    public boolean createExercise(Exercise e, user u) throws SQLException {
+        String query = "INSERT INTO exercises (userName, name, equipment, weight, sets, reps, exerciseID) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        try(Connection connection = getConnection()) {
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, u.getUserN());
+            preparedStatement.setString(2, e.name);
+            preparedStatement.setString(3, e.equipment);
+            preparedStatement.setInt(4, e.weight);
+            preparedStatement.setInt(5, e.sets);
+            preparedStatement.setInt(6, e.reps);
+            preparedStatement.setInt(7, e.getID());
+            int row = preparedStatement.executeUpdate();
+            return row > 0;
+        }catch(SQLException ex){}
+
+        return false;
+    }
 }
