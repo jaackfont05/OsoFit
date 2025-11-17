@@ -2,7 +2,7 @@
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
+/*
 public class Ebutton extends JButton{
     public Exercise exercise;
     public Ebutton() {
@@ -30,3 +30,4 @@ public class Ebutton extends JButton{
         return exercise;
     }
 }
+*/
