@@ -24,6 +24,8 @@ public class Exercise {
         exerciseID = Objects.hash(name,weight,equipment,sets,reps);
     }
 
+    public int getID(){return exerciseID;}
+
     public String toString(){
         StringBuilder sb = new StringBuilder();
         sb.append(name + '\n');

@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,8 +17,10 @@ public class forgetPasswordPage extends JFrame {
     private JTextField emailTf;
     private JTextField cityTf;
     private JTextField animalTf;
+    private MySQLDatabaseConnector db;
 
-    public forgetPasswordPage() {
+    public forgetPasswordPage(MySQLDatabaseConnector db) {
+        this.db = db;
         // Apply default style
         defaultSettings.setDefault(this);
         setTitle("OsoFit — Forget Password");
@@ -90,7 +93,7 @@ public class forgetPasswordPage extends JFrame {
         verify.addActionListener(this::onVerify);
         cancel.addActionListener(e -> {
             dispose();
-            new loginPage().setVisible(true);
+            new loginPage(db).setVisible(true);
         });
 
 
@@ -116,36 +119,18 @@ public class forgetPasswordPage extends JFrame {
             } else {
                 alert("Verification failed. Please check your answers.");
             }
-        } catch (IOException ex) {
+        } catch (SQLException ex) {
             alert("Error verifying account:\n" + ex.getMessage());
         }
     }
 
-    private boolean verifyUser(String email, String city, String animal) throws IOException {
-        Path p = Paths.get(DATA_PATH);
-        if (!Files.exists(p)) return false;
+    //update for database
 
-        try (BufferedReader br = Files.newBufferedReader(p, StandardCharsets.UTF_8)) {
-            String line;
-            boolean hasHeader = false;
-            while ((line = br.readLine()) != null) {
-                if (line.trim().isEmpty()) continue;
-                if (!hasHeader && line.toLowerCase().startsWith("username,email,")) {
-                    hasHeader = true;
-                    continue;
-                }
-                String[] cols = line.split(",", -1);
-                if (cols.length >= 6) {
-                    String emailCol = cols[1].trim();
-                    String cityCol = cols[3].trim();
-                    String animalCol = cols[4].trim();
-                    if (emailCol.equalsIgnoreCase(email)
-                            && cityCol.equalsIgnoreCase(city)
-                            && animalCol.equalsIgnoreCase(animal)) {
-                        return true;
-                    }
-                }
-            }
+    private boolean verifyUser(String email, String city, String animal) throws SQLException{
+        try {
+            return db.verifyUser(email, city, animal);
+        }catch (SQLException ex) {
+            alert("An account with that info does not exist.");
         }
         return false;
     }
@@ -187,8 +172,8 @@ public class forgetPasswordPage extends JFrame {
                 JOptionPane.showMessageDialog(dialog, "Password reset successfully!");
                 dialog.dispose();
                 dispose();
-                new loginPage().setVisible(true);
-            } catch (IOException ex) {
+                new loginPage(db).setVisible(true);
+            } catch (SQLException ex) {
                 alert("Failed to reset password:\n" + ex.getMessage());
             }
         });
@@ -201,29 +186,13 @@ public class forgetPasswordPage extends JFrame {
         dialog.setVisible(true);
     }
 
-    private void updatePassword(String email, String newPass) throws IOException {
-        Path p = Paths.get(DATA_PATH);
-        Path temp = Paths.get(DATA_PATH + ".tmp");
-
-        List<String> lines = Files.readAllLines(p, StandardCharsets.UTF_8);
-        List<String> updated = new ArrayList<>();
-
-        for (String line : lines) {
-            if (line.toLowerCase().startsWith("username,email,")) {
-                updated.add(line);
-                continue;
-            }
-            String[] cols = line.split(",", -1);
-            if (cols.length >= 6 && cols[1].trim().equalsIgnoreCase(email)) {
-                cols[2] = newPass; // Update password column
-                updated.add(String.join(",", cols));
-            } else {
-                updated.add(line);
-            }
+    //update for database
+    private void updatePassword(String email, String newPass) throws SQLException {
+        try{
+            db.updatePass(email, newPass);
+        }catch(SQLException e){
+            alert("Password could not be updated.");
         }
-
-        Files.write(temp, updated, StandardCharsets.UTF_8);
-        Files.move(temp, p, StandardCopyOption.REPLACE_EXISTING);
     }
 
     // --- UI helpers ---
