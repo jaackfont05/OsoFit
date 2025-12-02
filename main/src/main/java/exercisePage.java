@@ -5,9 +5,11 @@ import java.awt.*;
 
 public class exercisePage extends JFrame {
     private final user currentUser;
+    MySQLDatabaseConnector db;//need to implement
 
-    public exercisePage(user currentUser) {
+    public exercisePage(user currentUser, MySQLDatabaseConnector db) {
         this.currentUser = currentUser;
+        this.db = db;
 
         // Apply shared defaults
         defaultSettings.setDefault(this);
@@ -19,7 +21,7 @@ public class exercisePage extends JFrame {
         topPanel.setBackground(defaultSettings.BACKGROUND_COLOR);
 
         // (N) menu bar
-        menuBar bar = new menuBar(this, currentUser);
+        menuBar bar = new menuBar(this, currentUser, db);
         topPanel.add(bar, BorderLayout.NORTH);
 
         // (C) title

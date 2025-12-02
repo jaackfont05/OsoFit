@@ -163,7 +163,7 @@ public class loginPage extends JFrame {
 
                 // success: go to main page with the logged-in user
                 dispose();
-                new mainPage(u).setVisible(true);
+                new mainPage(u, db).setVisible(true);
 
             } catch (SQLException ex) {
                 JOptionPane.showMessageDialog(this,

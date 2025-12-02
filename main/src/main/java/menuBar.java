@@ -7,16 +7,24 @@ import java.awt.*;
 public class menuBar extends JPanel {
     private JFrame owner;       // which page has a menu bar
     private user currentUser;   // logged-in user
+    private MySQLDatabaseConnector db;
+    public menuBar(user currentUser) {
+        this.currentUser = currentUser;
+    }
 
     //!!! add your menu button variable here
-    private final JButton mainBtn;
-    private final JButton addExerciseBtn;
+    private JButton mainBtn;
+    private JButton addExerciseBtn;
+    private JButton setGoals;
+    private JButton sleepBtn;
+    private JButton workoutBtn;
 
     //After we know the owner, we can decide which page need dispose when we click
     // a button on the menu bar.
-    public menuBar(JFrame owner, user currentUser) {
+    public menuBar(JFrame owner, user currentUser, MySQLDatabaseConnector db) {
         this.owner = owner;
         this.currentUser = currentUser;
+        this.db = db;
 
         setBackground(defaultSettings.BACKGROUND_COLOR);
         setLayout(new BorderLayout());
@@ -39,7 +47,7 @@ public class menuBar extends JPanel {
                 return;
             }
             if (owner != null) owner.dispose();           // close current page
-            new mainPage(currentUser).setVisible(true);   // open main page
+            new mainPage(currentUser, db).setVisible(true);   // open main page
         });
 
         addExerciseBtn.addActionListener(e -> {
@@ -51,13 +59,37 @@ public class menuBar extends JPanel {
                 return;
             }
             if (owner != null) owner.dispose();
-            new exercisePage(currentUser).setVisible(true);
+            new exercisePage(currentUser, db).setVisible(true);
         });
         //!!!add your actionListener for your own button here
+
+        setGoals = new JButton("Set Goals");
+        setGoals.addActionListener(e -> {
+            if (owner instanceof SetGoalsPage) {
+                owner.toFront();
+                owner.requestFocus();
+                return;
+            }
+            if (owner != null) owner.dispose();
+            new SetGoalsPage(db, currentUser).setVisible(true);
+        });
+
+        sleepBtn = new JButton("Log Sleep");
+        sleepBtn.addActionListener(e -> {
+            System.out.println("In Progress");
+        });
+
+        workoutBtn = new JButton("Log Workout");
+        workoutBtn.addActionListener(e -> {
+            System.out.println("In Progress");
+        });
 
         //!!!don't forget add your btn in row here
         row.add(mainBtn);
         row.add(addExerciseBtn);
+        row.add(setGoals);
+        row.add(sleepBtn);
+        row.add(workoutBtn);
         add(row, BorderLayout.CENTER);
     }
 
