@@ -74,10 +74,18 @@ public class menuBar extends JPanel {
             new SetGoalsPage(db, currentUser).setVisible(true);
         });
 
-        sleepBtn = new JButton("Log Sleep");
+        sleepBtn = otherFeatureBtn("Log Sleep", new Color(200, 40, 40));
+
         sleepBtn.addActionListener(e -> {
-            System.out.println("In Progress");
+            if (owner instanceof sleepPage) {
+                owner.toFront();
+                owner.requestFocus();
+                return;
+            }
+            if (owner != null) owner.dispose();
+            new sleepPage(currentUser, db).setVisible(true);
         });
+
 
         workoutBtn = new JButton("Log Workout");
         workoutBtn.addActionListener(e -> {
