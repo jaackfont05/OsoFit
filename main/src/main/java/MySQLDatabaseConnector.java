@@ -6,8 +6,8 @@ public class MySQLDatabaseConnector {
     private static final int PORT = 3306;
 
     private static final String DATABASE_NAME = "OsoFitData";
-    private static final String USERNAME = "root";
-    private static final String PASSWORD = "123";
+    private static final String USERNAME = "jackFontenot";
+    private static final String PASSWORD = "12345";
 
     private static final String JDBC_URL = "jdbc:mysql://" + HOST + ":" + PORT + "/" + DATABASE_NAME +
             "?useSSL=true&serverTimezone=UTC";
@@ -34,7 +34,7 @@ public class MySQLDatabaseConnector {
     }
 
     public boolean insertUser(user u) throws SQLException {
-        String query = "INSERT INTO userInfo (username, email, _password, city, animal, role) VALUES (?, ?, ?, ?, ?, ?)";
+        String query = "INSERT INTO users (username, email, _password, city, animal, role) VALUES (?, ?, ?, ?, ?, ?)";
         String userN = u.getUserN();
         String email = u.getEmail();
         String password = u.getPassword();
@@ -64,7 +64,7 @@ public class MySQLDatabaseConnector {
     }
 
     public boolean userExists(user u) throws SQLException {
-        String query = "SELECT * FROM userInfo WHERE email = ? OR username = ?";
+        String query = "SELECT * FROM users WHERE email = ? OR username = ?";
         try (Connection connection = getConnection()) {
             PreparedStatement preparedStatement = connection.prepareStatement(query);
             preparedStatement.setString(1, u.getEmail());
@@ -79,7 +79,7 @@ public class MySQLDatabaseConnector {
     }
 
     public String[] loginUser(String email, String pass) throws SQLException {
-        String query = "SELECT username, email, _password, city, animal, role FROM userInfo WHERE email = ?";
+        String query = "SELECT username, email, _password, city, animal, role FROM users WHERE email = ?";
         try (Connection connection = getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
@@ -105,7 +105,7 @@ public class MySQLDatabaseConnector {
     }
 
     public boolean verifyUser(String email, String city, String anim) throws SQLException{
-        String query = "SELECT * FROM userInfo WHERE email = ? AND city = ? AND animal = ?";
+        String query = "SELECT * FROM users WHERE email = ? AND city = ? AND animal = ?";
         try (Connection connection = getConnection()) {
             PreparedStatement preparedStatement = connection.prepareStatement(query);
             preparedStatement.setString(1, email);
@@ -121,7 +121,7 @@ public class MySQLDatabaseConnector {
     }
 
     public boolean updatePass(String email, String pass) throws SQLException {
-        String query = "UPDATE userInfo SET _password = ? WHERE email = ?";
+        String query = "UPDATE users SET _password = ? WHERE email = ?";
         try (Connection connection = getConnection()) {
             PreparedStatement preparedStatement = connection.prepareStatement(query);
             preparedStatement.setString(1, pass);
