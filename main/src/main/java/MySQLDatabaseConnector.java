@@ -34,7 +34,7 @@ public class MySQLDatabaseConnector {
     }
 
     public boolean insertUser(user u) throws SQLException {
-        String query = "INSERT INTO users (userN, email, _password, city, animal, role) VALUES (?, ?, ?, ?, ?, ?)";
+        String query = "INSERT INTO users (userN, email, passW, city, animal, role) VALUES (?, ?, ?, ?, ?, ?)";
         String userN = u.getUserN();
         String email = u.getEmail();
         String password = u.getPassword();
