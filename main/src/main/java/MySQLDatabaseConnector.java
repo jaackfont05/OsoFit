@@ -34,7 +34,7 @@ public class MySQLDatabaseConnector {
     }
 
     public boolean insertUser(user u) throws SQLException {
-        String query = "INSERT INTO users (username, email, _password, city, animal, role) VALUES (?, ?, ?, ?, ?, ?)";
+        String query = "INSERT INTO users (userN, email, _password, city, animal, role) VALUES (?, ?, ?, ?, ?, ?)";
         String userN = u.getUserN();
         String email = u.getEmail();
         String password = u.getPassword();
@@ -64,7 +64,7 @@ public class MySQLDatabaseConnector {
     }
 
     public boolean userExists(user u) throws SQLException {
-        String query = "SELECT * FROM users WHERE email = ? OR username = ?";
+        String query = "SELECT * FROM users WHERE email = ? OR userN = ?";
         try (Connection connection = getConnection()) {
             PreparedStatement preparedStatement = connection.prepareStatement(query);
             preparedStatement.setString(1, u.getEmail());
@@ -79,7 +79,7 @@ public class MySQLDatabaseConnector {
     }
 
     public String[] loginUser(String email, String pass) throws SQLException {
-        String query = "SELECT username, email, _password, city, animal, role FROM users WHERE email = ?";
+        String query = "SELECT userN, email, passW, city, animal, role FROM users WHERE email = ?";
         try (Connection connection = getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
@@ -87,10 +87,10 @@ public class MySQLDatabaseConnector {
 
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
-                    String storedPassword = resultSet.getString("_password");
+                    String storedPassword = resultSet.getString("passW");
                     if (pass.equals(storedPassword)) { // Note: In production, use hashed passwords and secure comparison
                         return new String[] {
-                                resultSet.getString("username"),
+                                resultSet.getString("userN"),
                                 resultSet.getString("email"),
                                 storedPassword,
                                 resultSet.getString("city"),
@@ -121,7 +121,7 @@ public class MySQLDatabaseConnector {
     }
 
     public boolean updatePass(String email, String pass) throws SQLException {
-        String query = "UPDATE users SET _password = ? WHERE email = ?";
+        String query = "UPDATE users SET passW = ? WHERE email = ?";
         try (Connection connection = getConnection()) {
             PreparedStatement preparedStatement = connection.prepareStatement(query);
             preparedStatement.setString(1, pass);
@@ -134,7 +134,7 @@ public class MySQLDatabaseConnector {
     }
 
     public boolean createExercise(Exercise e, user u) throws SQLException {
-        String query = "INSERT INTO exercises (userName, name, equipment, weight, sets, reps, exerciseID) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String query = "INSERT INTO exercises (userN, name, equipment, weight, sets, reps, exerciseID) VALUES (?, ?, ?, ?, ?, ?, ?)";
         try(Connection connection = getConnection()) {
             PreparedStatement preparedStatement = connection.prepareStatement(query);
             preparedStatement.setString(1, u.getUserN());
