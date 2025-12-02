@@ -115,7 +115,7 @@ public class sleepPage extends JFrame {
 
         // simple placeholder logic for now
         saveBtn.addActionListener(e -> {
-            // later: validate + send to DB using db
+
             JOptionPane.showMessageDialog(
                     this,
                     "Sleep entry recorded (UI only – DB logic later).",
@@ -125,7 +125,7 @@ public class sleepPage extends JFrame {
         });
     }
 
-    // ==== helper methods (copied style from exercisePage) ====
+
 
     private static JLabel stdLabel(String text) {
         JLabel l = new JLabel(text);
