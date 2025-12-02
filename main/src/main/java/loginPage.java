@@ -288,7 +288,12 @@ public class loginPage extends JFrame {
         try{
             String[] userI = db.loginUser(email, password);
             if(userI != null && userI.length > 0){
-                user res = new user(userI[0], userI[1], userI[2], userI[3], userI[4], userI[5]);
+                user res;
+                if(userI[5] == "user"){
+                    res = new user(userI[0], userI[1], userI[2], userI[3], userI[4], userI[5]);
+                }else{
+                    res = new trainer(userI[0], userI[1], userI[2], userI[3], userI[4]);
+                }
                 return res;
             }
         }catch(SQLException e){

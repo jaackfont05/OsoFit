@@ -88,7 +88,7 @@ public class MySQLDatabaseConnector {
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
                     String storedPassword = resultSet.getString("passW");
-                    if (pass.equals(storedPassword)) { // Note: In production, use hashed passwords and secure comparison
+                    if (pass.equals(storedPassword)) {
                         return new String[] {
                                 resultSet.getString("userN"),
                                 resultSet.getString("email"),
