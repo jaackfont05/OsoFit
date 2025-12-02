@@ -5,7 +5,7 @@ import java.awt.*;
 
 public class exercisePage extends JFrame {
     private final user currentUser;
-    MySQLDatabaseConnector db;//need to implement
+    private MySQLDatabaseConnector db;//need to implement
 
     public exercisePage(user currentUser, MySQLDatabaseConnector db) {
         this.currentUser = currentUser;
