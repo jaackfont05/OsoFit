@@ -54,7 +54,7 @@ public class mainPage extends JFrame {
         JLabel welcome = new JLabel("Welcome, " + displayName + "!", SwingConstants.CENTER);
         welcome.setForeground(defaultSettings.TEXT_COLOR);
         welcome.setFont(new Font("Serif", Font.BOLD, 36));
-        center.add(welcome, BorderLayout.CENTER);
+        center.add(welcome, BorderLayout.NORTH);
 
         add(center, BorderLayout.CENTER);
     }

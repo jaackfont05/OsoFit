@@ -3,22 +3,20 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import java.awt.*;
 
-public class SetGoalsPage extends JFrame {
-    public MySQLDatabaseConnector db;
-    public user currentUser;
+public class MealPage extends JFrame {
+    private static Meal meal;
+    private MySQLDatabaseConnector db;
+    private user u;
     private static JTextField nameTf;
     private static JTextField calsTf;
-    private static JTextField setsTf;
-    private static JTextField weightTf;
-    private static JTextField repsTf;
 
-    public SetGoalsPage(MySQLDatabaseConnector db, user u) {
+    public MealPage(user u, MySQLDatabaseConnector db) {
         this.db = db;
-        currentUser = u;
+        this.u = u;
 
         // Apply shared defaults
         defaultSettings.setDefault(this);
-        setTitle("OsoFit — Set Goals Page");
+        setTitle("OsoFit — Meal Page");
         setLayout(new BorderLayout(10, 10));
 
         //NORTH part bas a sub BorderLayout for menu bar (N), title (C), red line (S)
@@ -26,7 +24,7 @@ public class SetGoalsPage extends JFrame {
         topPanel.setBackground(defaultSettings.BACKGROUND_COLOR);
 
         // (N) menu bar
-        menuBar bar = new menuBar(this, currentUser, db);
+        menuBar bar = new menuBar(this, u, db);
         topPanel.add(bar, BorderLayout.NORTH);
 
         // (C) title
@@ -34,7 +32,7 @@ public class SetGoalsPage extends JFrame {
         titleWrap.setBackground(defaultSettings.BACKGROUND_COLOR);
         titleWrap.setBorder(new EmptyBorder(8, 12, 0, 12));
 
-        JLabel title = new JLabel("Goals", SwingConstants.CENTER);
+        JLabel title = new JLabel("Meal", SwingConstants.CENTER);
         title.setForeground(defaultSettings.TEXT_COLOR);
         title.setFont(defaultSettings.TITLE_FONT);
         titleWrap.add(title, BorderLayout.CENTER);
@@ -71,9 +69,9 @@ public class SetGoalsPage extends JFrame {
         fg.insets = new Insets(0, 12, 8, 12);
         fg.gridy = 0;
 
-        //Current weight
+        //name
         fg.gridx = 0; fg.anchor = GridBagConstraints.EAST;
-        JLabel nameLbl = stdLabel("Current weight (lb):");
+        JLabel nameLbl = stdLabel("Meal Name:");
         form.add(nameLbl, fg);
 
         fg.gridx = 1; fg.anchor = GridBagConstraints.WEST;
@@ -83,54 +81,17 @@ public class SetGoalsPage extends JFrame {
         nameTf.setMaximumSize(tfSize);   // prevent vertical stretching
         form.add(nameTf, fg);
 
-        // goal weight row
+        //calories
         fg.gridy++; fg.gridx = 0; fg.anchor = GridBagConstraints.EAST;
-        JLabel weightLbl = stdLabel("Goal weight (lb):");
+        JLabel weightLbl = stdLabel("Calories:");
         form.add(weightLbl, fg);
-
-        fg.gridx = 1; fg.anchor = GridBagConstraints.WEST;
-        weightTf = stdTextField(360);
-        weightTf.setColumns(20);
-        Dimension pfSize = weightTf.getPreferredSize();
-        weightTf.setMaximumSize(pfSize);    // prevent vertical stretching
-        form.add(weightTf, fg);
-
-        //sleep row
-        fg.gridy++; fg.gridx = 0; fg.anchor = GridBagConstraints.EAST;
-        JLabel setsLbl = stdLabel("Daily sleep goal (hr):");
-        form.add(setsLbl, fg);
-
-        fg.gridx = 1; fg.anchor = GridBagConstraints.WEST;
-        setsTf = stdTextField(360);
-        setsTf.setColumns(20);
-        Dimension setsSize = setsTf.getPreferredSize();
-        setsTf.setMaximumSize(setsSize);    // prevent vertical stretching
-        form.add(setsTf, fg);
-
-        //steps row
-        fg.gridy++; fg.gridx = 0; fg.anchor = GridBagConstraints.EAST;
-        JLabel repsLbl = stdLabel("Daily step goal:");
-        form.add(repsLbl, fg);
-
-        fg.gridx = 1; fg.anchor = GridBagConstraints.WEST;
-        repsTf = stdTextField(360);
-        repsTf.setColumns(20);
-        Dimension repsSize = repsTf.getPreferredSize();
-        repsTf.setMaximumSize(repsSize);    // prevent vertical stretching
-        form.add(repsTf, fg);
-
-        //calories row
-        fg.gridy++; fg.gridx = 0; fg.anchor = GridBagConstraints.EAST;
-        JLabel calsLbl = stdLabel("Daily calorie goal:");
-        form.add(calsLbl, fg);
 
         fg.gridx = 1; fg.anchor = GridBagConstraints.WEST;
         calsTf = stdTextField(360);
         calsTf.setColumns(20);
-        Dimension calsSize = calsTf.getPreferredSize();
-        calsTf.setMaximumSize(calsSize);    // prevent vertical stretching
+        Dimension pfSize = calsTf.getPreferredSize();
+        calsTf.setMaximumSize(pfSize);    // prevent vertical stretching
         form.add(calsTf, fg);
-
 
         fg.gridy++; fg.gridx = 0; fg.gridwidth = 2; fg.anchor = GridBagConstraints.CENTER;
         JButton set = button();
@@ -158,21 +119,21 @@ public class SetGoalsPage extends JFrame {
     }
 
     private static JButton button(){
-        JButton b = new JButton("Set Goals");
+        JButton b = new JButton("Log Meal");
         b.setOpaque(false);
         b.setBackground(defaultSettings.BACKGROUND_COLOR);
         b.setForeground(defaultSettings.TEXT_COLOR);
         b.setFont(defaultSettings.LABEL_FONT);
         b.addActionListener(e -> {
             try{
-                int currW = Integer.parseInt(nameTf.getText());
-                int goalW = Integer.parseInt(weightTf.getText());
-                int sleep = Integer.parseInt(setsTf.getText());
+                String name = nameTf.getText();
                 int cals = Integer.parseInt(calsTf.getText());
-                int steps = Integer.parseInt(repsTf.getText());
-                JOptionPane.showMessageDialog(null, "User goals created");
+                meal = new Meal(name, cals);
+                JOptionPane.showMessageDialog(null, "Meal logged");
+                nameTf.setText("");
+                calsTf.setText("");
             }catch(Exception ex){
-                JOptionPane.showMessageDialog(null, "Goals did not set");
+                JOptionPane.showMessageDialog(null, "Meal did not set");
             }
         });
         return b;

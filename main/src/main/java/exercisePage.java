@@ -6,6 +6,13 @@ import java.awt.*;
 public class exercisePage extends JFrame {
     private final user currentUser;
     private MySQLDatabaseConnector db;//need to implement
+    private static JTextField nameTf;
+    private static JTextField weightTf;
+    private static JTextField setsTf;
+    private static JTextField repsTf;
+    private static JTextField equipTf;
+
+
 
     public exercisePage(user currentUser, MySQLDatabaseConnector db) {
         this.currentUser = currentUser;
@@ -72,11 +79,23 @@ public class exercisePage extends JFrame {
         form.add(nameLbl, fg);
 
         fg.gridx = 1; fg.anchor = GridBagConstraints.WEST;
-        JTextField nameTf = stdTextField(360);
+        nameTf = stdTextField(360);
         nameTf.setColumns(20);
         Dimension tfSize = nameTf.getPreferredSize();
         nameTf.setMaximumSize(tfSize);   // prevent vertical stretching
         form.add(nameTf, fg);
+
+        //Equipment row
+        fg.gridy++; fg.gridx = 0; fg.anchor = GridBagConstraints.EAST;
+        JLabel equipLbl = stdLabel("Enter necessary equipment:");
+        form.add(equipLbl, fg);
+
+        fg.gridx = 1; fg.anchor = GridBagConstraints.WEST;
+        equipTf = stdTextField(360);
+        equipTf.setColumns(20);
+        Dimension etfSize = equipTf.getPreferredSize();
+        equipTf.setMaximumSize(etfSize);   // prevent vertical stretching
+        form.add(equipTf, fg);
 
         // weight row
         fg.gridy++; fg.gridx = 0; fg.anchor = GridBagConstraints.EAST;
@@ -84,7 +103,7 @@ public class exercisePage extends JFrame {
         form.add(weightLbl, fg);
 
         fg.gridx = 1; fg.anchor = GridBagConstraints.WEST;
-        JTextField weightTf = stdTextField(360);
+        weightTf = stdTextField(360);
         weightTf.setColumns(20);
         Dimension pfSize = weightTf.getPreferredSize();
         weightTf.setMaximumSize(pfSize);    // prevent vertical stretching
@@ -96,7 +115,7 @@ public class exercisePage extends JFrame {
         form.add(setsLbl, fg);
 
         fg.gridx = 1; fg.anchor = GridBagConstraints.WEST;
-        JTextField setsTf = stdTextField(360);
+        setsTf = stdTextField(360);
         setsTf.setColumns(20);
         Dimension setsSize = setsTf.getPreferredSize();
         setsTf.setMaximumSize(setsSize);    // prevent vertical stretching
@@ -108,7 +127,7 @@ public class exercisePage extends JFrame {
         form.add(repsLbl, fg);
 
         fg.gridx = 1; fg.anchor = GridBagConstraints.WEST;
-        JTextField repsTf = stdTextField(360);
+        repsTf = stdTextField(360);
         repsTf.setColumns(20);
         Dimension repsSize = repsTf.getPreferredSize();
         repsTf.setMaximumSize(repsSize);    // prevent vertical stretching
@@ -147,7 +166,17 @@ public class exercisePage extends JFrame {
         b.setForeground(defaultSettings.TEXT_COLOR);
         b.setFont(defaultSettings.LABEL_FONT);
         b.addActionListener(e -> {
-
+            try {
+                String name = nameTf.getText();
+                String equipment = equipTf.getText();
+                int weight = Integer.parseInt(weightTf.getText());
+                int sets = Integer.parseInt(setsTf.getText());
+                int reps = Integer.parseInt(repsTf.getText());
+                Exercise exercise = new Exercise(weight, equipment, sets, reps, name);
+                JOptionPane.showMessageDialog(null, "Exercise created successfully!");
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(null, "Please enter valid integers for weight, sets, and reps.");
+            }
         });
 
         return b;

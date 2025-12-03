@@ -18,6 +18,7 @@ public class menuBar extends JPanel {
     private JButton setGoals;
     private JButton sleepBtn;
     private JButton workoutBtn;
+    private JButton mealBtn;
 
     //After we know the owner, we can decide which page need dispose when we click
     // a button on the menu bar.
@@ -63,7 +64,7 @@ public class menuBar extends JPanel {
         });
         //!!!add your actionListener for your own button here
 
-        setGoals = new JButton("Set Goals");
+        setGoals = otherFeatureBtn("Set Goals", new Color(200, 40, 40));
         setGoals.addActionListener(e -> {
             if (owner instanceof SetGoalsPage) {
                 owner.toFront();
@@ -83,13 +84,25 @@ public class menuBar extends JPanel {
                 return;
             }
             if (owner != null) owner.dispose();
+
             new sleepPage(currentUser, db).setVisible(true);
         });
 
 
-        workoutBtn = new JButton("Log Workout");
+        workoutBtn = otherFeatureBtn("Log Workout", new Color(200, 40, 40));
         workoutBtn.addActionListener(e -> {
             System.out.println("In Progress");
+        });
+
+        mealBtn = otherFeatureBtn("Log Meal", new Color(200, 40, 40));
+        mealBtn.addActionListener(e -> {
+            if(owner instanceof MealPage){
+                owner.toFront();
+                owner.requestFocus();
+                return;
+            }
+            if (owner != null) owner.dispose();
+            new MealPage(currentUser, db).setVisible(true);
         });
 
         //!!!don't forget add your btn in row here
@@ -98,6 +111,7 @@ public class menuBar extends JPanel {
         row.add(setGoals);
         row.add(sleepBtn);
         row.add(workoutBtn);
+        row.add(mealBtn);
         add(row, BorderLayout.CENTER);
     }
 
