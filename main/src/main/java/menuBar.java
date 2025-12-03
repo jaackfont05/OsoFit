@@ -19,6 +19,9 @@ public class menuBar extends JPanel {
     private JButton sleepBtn;
     private JButton workoutBtn;
     private JButton mealBtn;
+    private JButton createWorkBtn;
+    private JButton statsBtn;
+    private JButton joinClassBtn;
 
     //After we know the owner, we can decide which page need dispose when we click
     // a button on the menu bar.
@@ -35,8 +38,8 @@ public class menuBar extends JPanel {
         JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 8));
         row.setOpaque(false);
         //!!!declare your menu button variable by using otherFeatureButton()
-        mainBtn = mainPageBtn("Main Page");  //
-        addExerciseBtn = otherFeatureBtn("Add Exercise",
+        mainBtn = mainPageBtn(" Main Page ");  //
+        addExerciseBtn = otherFeatureBtn(" Add Exercise ",
                 new Color(200, 40, 40)); // you can choose different color if you want :)
 
         //HelpMe: if someone can add a short sound when user is clicking a menu button, that would be perfect!
@@ -64,7 +67,7 @@ public class menuBar extends JPanel {
         });
         //!!!add your actionListener for your own button here
 
-        setGoals = otherFeatureBtn("Set Goals", new Color(200, 40, 40));
+        setGoals = otherFeatureBtn(" Set Goals ", new Color(200, 40, 40));
         setGoals.addActionListener(e -> {
             if (owner instanceof SetGoalsPage) {
                 owner.toFront();
@@ -75,7 +78,7 @@ public class menuBar extends JPanel {
             new SetGoalsPage(db, currentUser).setVisible(true);
         });
 
-        sleepBtn = otherFeatureBtn("Log Sleep", new Color(200, 40, 40));
+        sleepBtn = otherFeatureBtn(" Log Sleep ", new Color(200, 40, 40));
 
         sleepBtn.addActionListener(e -> {
             if (owner instanceof sleepPage) {
@@ -89,12 +92,30 @@ public class menuBar extends JPanel {
         });
 
 
-        workoutBtn = otherFeatureBtn("Log Workout", new Color(200, 40, 40));
+        workoutBtn = otherFeatureBtn(" Log Workout ", new Color(200, 40, 40));
         workoutBtn.addActionListener(e -> {
-            System.out.println("In Progress");
+            if(owner instanceof LogWorkoutPage) {
+                owner.toFront();
+                owner.requestFocus();
+                return;
+            }
+            if (owner != null) owner.dispose();
+            new LogWorkoutPage(currentUser, db).setVisible(true);
         });
 
-        mealBtn = otherFeatureBtn("Log Meal", new Color(200, 40, 40));
+        createWorkBtn = otherFeatureBtn(" Create Workout ", new Color(200, 40, 40));
+        createWorkBtn.addActionListener(e -> {
+            if(owner instanceof CreateWorkoutPage) {
+                owner.toFront();
+                owner.requestFocus();
+                return;
+            }
+            if (owner != null) owner.dispose();
+            new CreateWorkoutPage(currentUser, db).setVisible(true);
+        });
+
+
+        mealBtn = otherFeatureBtn(" Log Meal ", new Color(200, 40, 40));
         mealBtn.addActionListener(e -> {
             if(owner instanceof MealPage){
                 owner.toFront();
@@ -105,6 +126,28 @@ public class menuBar extends JPanel {
             new MealPage(currentUser, db).setVisible(true);
         });
 
+        statsBtn = otherFeatureBtn("  Stats  ", new Color(200, 40, 40));
+        statsBtn.addActionListener(e -> {
+            if(owner instanceof StatsPage){
+                owner.toFront();
+                owner.requestFocus();
+                return;
+            }
+            if (owner != null) owner.dispose();
+            new StatsPage(currentUser, db).setVisible(true);
+        });
+
+        joinClassBtn = otherFeatureBtn(" Join Class ", new Color(200, 40, 40));
+        joinClassBtn.addActionListener(e -> {
+            if(owner instanceof ClassPage){
+                owner.toFront();
+                owner.requestFocus();
+                return;
+            }
+            if (owner != null) owner.dispose();
+            new ClassPage(currentUser, db).setVisible(true);
+        });
+
         //!!!don't forget add your btn in row here
         row.add(mainBtn);
         row.add(addExerciseBtn);
@@ -112,6 +155,8 @@ public class menuBar extends JPanel {
         row.add(sleepBtn);
         row.add(workoutBtn);
         row.add(mealBtn);
+        row.add(createWorkBtn);
+        row.add(statsBtn);
         add(row, BorderLayout.CENTER);
     }
 

@@ -14,7 +14,7 @@ public class sleepPage extends JFrame {
 
         // Apply shared defaults
         defaultSettings.setDefault(this);
-        setTitle("OsoFit — Record Sleep");
+        setTitle("OsoFit — Record Sleep Page");
         setLayout(new BorderLayout(10, 10));
 
         // ===== NORTH: menu bar + title + red line =====
