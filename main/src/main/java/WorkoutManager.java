@@ -17,7 +17,7 @@ public class WorkoutManager {
         if (durationMin < 0 || calories < 0 || type == null || type.isBlank())
             throw new IllegalArgumentException("Invalid workout input");
 
-        Workout w = new Workout(nextId++, userId, type, durationMin, calories, notes, LocalDateTime.now());
+        Workout w = new Workout(nextId++, userId, type, durationMin, calories, notes, LocalDateTime.now(), null);
         workouts.add(w);
         recalculateDashboard(userId);
         System.out.println("Workout logged successfully: " + w);

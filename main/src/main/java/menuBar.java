@@ -22,6 +22,7 @@ public class menuBar extends JPanel {
     private JButton createWorkBtn;
     private JButton statsBtn;
     private JButton joinClassBtn;
+    private JButton reminderBtn;
 
     //After we know the owner, we can decide which page need dispose when we click
     // a button on the menu bar.
@@ -148,6 +149,17 @@ public class menuBar extends JPanel {
             new ClassPage(currentUser, db).setVisible(true);
         });
 
+        reminderBtn = otherFeatureBtn(" Reminders ", new Color(200, 40, 40));
+        reminderBtn.addActionListener(e -> {
+            if(owner instanceof ReminderPage){
+                owner.toFront();
+                owner.requestFocus();
+                return;
+            }
+            if (owner != null) owner.dispose();
+            new ReminderPage(currentUser, db).setVisible(true);
+        });
+
         //!!!don't forget add your btn in row here
         row.add(mainBtn);
         row.add(addExerciseBtn);
@@ -157,6 +169,8 @@ public class menuBar extends JPanel {
         row.add(mealBtn);
         row.add(createWorkBtn);
         row.add(statsBtn);
+        row.add(joinClassBtn);
+        row.add(reminderBtn);
         add(row, BorderLayout.CENTER);
     }
 

@@ -1,4 +1,5 @@
 import java.time.LocalDateTime;
+import java.util.*;
 
 /**
  * Connor Griffin - Workout entity class
@@ -12,8 +13,9 @@ public class Workout {
     private int calories;
     private String notes;
     private LocalDateTime dateTime;
+    public List<Exercise> exercises;
 
-    public Workout(int workoutId, String userId, String type, int durationMin, int calories, String notes, LocalDateTime dateTime) {
+    public Workout(int workoutId, String userId, String type, int durationMin, int calories, String notes, LocalDateTime dateTime,  List<Exercise> exercises) {
         this.workoutId = workoutId;
         this.userId = userId;
         this.type = type;
@@ -21,6 +23,7 @@ public class Workout {
         this.calories = calories;
         this.notes = notes;
         this.dateTime = dateTime;
+        this.exercises = exercises;
     }
 
     // Getters & Setters
