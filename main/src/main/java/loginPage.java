@@ -163,7 +163,7 @@ public class loginPage extends JFrame {
 
                 // success: go to main page with the logged-in user
                 dispose();
-                if(u.getRole().equals("user") || u.getRole().equals("trainer")) {
+                if(u.getRole().equals("User") || u.getRole().equals("trainer")) {
                     new mainPage(u, db).setVisible(true);
                 }else if(u.getRole().equals("admin")) {
                     new AdminPage(u, db).setVisible(true);
@@ -295,9 +295,9 @@ public class loginPage extends JFrame {
             String[] userI = db.loginUser(email, password);
             if(userI != null && userI.length > 0){
                 user res;
-                if(userI[5] == "user"){
+                if(userI[5].equals("User")){
                     res = new user(userI[0], userI[1], userI[2], userI[3], userI[4], userI[5]);
-                }else if(userI[5] == "trainer"){
+                }else if(userI[5].equals("trainer")){
                     res = new trainer(userI[0], userI[1], userI[2], userI[3], userI[4]);
                 }else{
                     res = new Admin(userI[0], userI[1], userI[2], userI[3], userI[4]);
