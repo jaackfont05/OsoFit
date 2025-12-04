@@ -17,7 +17,7 @@ public class WorkoutManager {
         if (durationMin < 0 || calories < 0 || type == null || type.isBlank())
             throw new IllegalArgumentException("Invalid workout input");
 
-        Workout w = new Workout(nextId++, userId, type, durationMin, calories, notes, LocalDateTime.now(), null);
+        Workout w = new Workout(nextId++, userId, type, durationMin, calories, LocalDateTime.now(), null);
         workouts.add(w);
         recalculateDashboard(userId);
         System.out.println("Workout logged successfully: " + w);
@@ -25,7 +25,7 @@ public class WorkoutManager {
     }
 
     /** UC3: Edit or Delete Workout Entry */
-    public void editOrDeleteWorkoutEntry(int workoutId, String action, String newType, int newDuration, int newCalories, String newNotes) {
+    public void editOrDeleteWorkoutEntry(int workoutId, String action, String newType, int newDuration, int newCalories) {
         Workout target = workouts.stream().filter(w -> w.getWorkoutId() == workoutId).findFirst().orElse(null);
         if (target == null) {
             System.out.println("Workout not found.");
@@ -36,24 +36,23 @@ public class WorkoutManager {
             target.setType(newType);
             target.setDurationMin(newDuration);
             target.setCalories(newCalories);
-            target.setNotes(newNotes);
             System.out.println("Workout updated: " + target);
         } else if (action.equalsIgnoreCase("delete")) {
             workouts.remove(target);
             System.out.println("Workout deleted: " + workoutId);
         }
 
-        recalculateDashboard(target.getUserId());
+        recalculateDashboard(target.getEmail());
     }
 
     /** UC3 Postcondition: update aggregates after change */
     public void recalculateDashboard(String userId) {
         int totalMinutes = workouts.stream()
-                .filter(w -> w.getUserId().equals(userId))
+                .filter(w -> w.getEmail().equals(userId))
                 .mapToInt(Workout::getDurationMin)
                 .sum();
         int totalCalories = workouts.stream()
-                .filter(w -> w.getUserId().equals(userId))
+                .filter(w -> w.getEmail().equals(userId))
                 .mapToInt(Workout::getCalories)
                 .sum();
         System.out.println("Dashboard recalculated for " + userId + 
