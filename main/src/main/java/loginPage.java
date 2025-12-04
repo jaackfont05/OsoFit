@@ -291,8 +291,10 @@ public class loginPage extends JFrame {
                 user res;
                 if(userI[5] == "user"){
                     res = new user(userI[0], userI[1], userI[2], userI[3], userI[4], userI[5]);
-                }else{
+                }else if(userI[5] == "trainer"){
                     res = new trainer(userI[0], userI[1], userI[2], userI[3], userI[4]);
+                }else{
+                    res = new Admin(userI[0], userI[1], userI[2], userI[3], userI[4]);
                 }
                 return res;
             }

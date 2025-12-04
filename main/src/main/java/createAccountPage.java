@@ -151,7 +151,13 @@ public class createAccountPage extends JFrame {
         String pass2    = new String(retypeTf.getPassword());
         String city     = trim(cityTf);
         String animal   = trim(animalTf);
-        String role     = trainerRb.isSelected() ? "Trainer" : "User";
+        String role;
+
+        if (userRb.isSelected()) {
+            role = "User";
+        }else{
+            role = "Trainer";
+        }
 
         // 1) Required fields
         if (username.isEmpty() || email.isEmpty() || pass1.isEmpty() || pass2.isEmpty()
