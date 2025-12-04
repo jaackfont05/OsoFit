@@ -6,6 +6,7 @@ Here's some installation and setup information so our OsoFit code works properly
 TO-DO: Directions to run from jar file
 
 TO-DO: Add different login account info
+
 Normal User Login:
 username: 
 password:
