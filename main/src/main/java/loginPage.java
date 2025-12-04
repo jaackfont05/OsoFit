@@ -163,7 +163,13 @@ public class loginPage extends JFrame {
 
                 // success: go to main page with the logged-in user
                 dispose();
-                new mainPage(u, db).setVisible(true);
+                if(u.getRole().equals("user") || u.getRole().equals("trainer")) {
+                    new mainPage(u, db).setVisible(true);
+                }else if(u.getRole().equals("admin")) {
+                    new AdminPage(u, db).setVisible(true);
+                }else{
+                    JOptionPane.showMessageDialog(null, "Error");
+                }
 
             } catch (SQLException ex) {
                 JOptionPane.showMessageDialog(this,
