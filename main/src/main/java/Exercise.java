@@ -21,7 +21,7 @@ public class Exercise {
     public Exercise() {}
 
     private void setID(){
-        exerciseID = Objects.hash(name,weight,equipment,sets,reps);
+        exerciseID = Objects.hash(name, equipment,  sets, reps);
     }
 
     public int getID(){return exerciseID;}

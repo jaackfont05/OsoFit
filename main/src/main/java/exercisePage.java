@@ -2,10 +2,11 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import java.awt.*;
+import java.sql.SQLException;
 
 public class exercisePage extends JFrame {
-    private final user currentUser;
-    private MySQLDatabaseConnector db;//need to implement
+    private static user currentUser;
+    private static MySQLDatabaseConnector db;//need to implement
     private static JTextField nameTf;
     private static JTextField weightTf;
     private static JTextField setsTf;
@@ -173,9 +174,12 @@ public class exercisePage extends JFrame {
                 int sets = Integer.parseInt(setsTf.getText());
                 int reps = Integer.parseInt(repsTf.getText());
                 Exercise exercise = new Exercise(weight, equipment, sets, reps, name);
-                JOptionPane.showMessageDialog(null, "Exercise created successfully!");
+                db.createExercise(exercise, currentUser);
+                JOptionPane.showMessageDialog(null, "Exercise added successfully");
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(null, "Please enter valid integers for weight, sets, and reps.");
+            }catch(SQLException exc){
+                JOptionPane.showMessageDialog(null, "Something went wrong while trying to add exercise.");
             }
         });
 

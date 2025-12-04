@@ -1,3 +1,4 @@
+import javax.swing.*;
 import java.sql.*;
 
 public class MySQLDatabaseConnector {
@@ -134,20 +135,24 @@ public class MySQLDatabaseConnector {
     }
 
     public boolean createExercise(Exercise e, user u) throws SQLException {
-        String query = "INSERT INTO exercises (userN, name, equipment, weight, sets, reps, exerciseID) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String query = "INSERT INTO Exercises (email, exerciseID, name, weight_pounds, equipment, reps, sets) VALUES (?, ?, ?, ?, ?, ?, ?)";
         try(Connection connection = getConnection()) {
             PreparedStatement preparedStatement = connection.prepareStatement(query);
-            preparedStatement.setString(1, u.getUserN());
-            preparedStatement.setString(2, e.name);
-            preparedStatement.setString(3, e.equipment);
+            preparedStatement.setString(1, u.getEmail());
+            preparedStatement.setInt(2, e.getID());
+            preparedStatement.setString(3, e.name);
             preparedStatement.setInt(4, e.weight);
-            preparedStatement.setInt(5, e.sets);
+            preparedStatement.setString(5, e.equipment);
             preparedStatement.setInt(6, e.reps);
-            preparedStatement.setInt(7, e.getID());
+            preparedStatement.setInt(7, e.sets);
+            System.out.println("Saving exercise: " +  e.toString());
             int row = preparedStatement.executeUpdate();
             return row > 0;
-        }catch(SQLException ex){}
+        }catch(SQLException ex){
+            JOptionPane.showMessageDialog(null, ex.getMessage());
+        }
 
         return false;
     }
+
 }

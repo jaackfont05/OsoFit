@@ -23,6 +23,7 @@ public class menuBar extends JPanel {
     private JButton statsBtn;
     private JButton joinClassBtn;
     private JButton reminderBtn;
+    private JButton socialBtn;
 
     //After we know the owner, we can decide which page need dispose when we click
     // a button on the menu bar.
@@ -160,6 +161,17 @@ public class menuBar extends JPanel {
             new ReminderPage(currentUser, db).setVisible(true);
         });
 
+        socialBtn = otherFeatureBtn(" Social ", new Color(200, 40, 40));
+        socialBtn.addActionListener(e -> {
+            if(owner instanceof SocialsPage){
+                owner.toFront();
+                owner.requestFocus();
+                return;
+            }
+            if (owner != null) owner.dispose();
+            new SocialsPage(currentUser, db).setVisible(true);
+        });
+
         //!!!don't forget add your btn in row here
         row.add(mainBtn);
         row.add(addExerciseBtn);
@@ -171,6 +183,7 @@ public class menuBar extends JPanel {
         row.add(statsBtn);
         row.add(joinClassBtn);
         row.add(reminderBtn);
+        row.add(socialBtn);
         add(row, BorderLayout.CENTER);
     }
 
