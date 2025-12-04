@@ -13,7 +13,7 @@ public class MySQLDatabaseConnector {
     private static final String JDBC_URL = "jdbc:mysql://" + HOST + ":" + PORT + "/" + DATABASE_NAME +
             "?useSSL=true&serverTimezone=UTC";
 
-    private static Connection getConnection() throws SQLException {
+    public static Connection getConnection() throws SQLException {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
         } catch (ClassNotFoundException e) {
