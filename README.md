@@ -1,11 +1,19 @@
 # OsoFit
 
-Trello board: **https://trello.com/b/dfytv6HD/osofit**
+Welcome to OsoFit! We're so glad you've decided to join the Oso community for your fitness and health needs! 
+Here's some installation and setup information so our OsoFit code works properly on your system when running from the JAR file.
 
-Jack Fontenot:- Change password, Create meal, Create injury
-              - Designer Engineer
-Connor Griffin(Project Manager): Log Workout, Join Plan, Edit/Delete Workout
-Mason Baxter(Requirements engineer): Sleep related tasks
-Savannah Johnson (Quality Assurance Engineer): record weight, set weight goal, track hydration
-Dannis Wu (software Designer): Main homepage design, create plan, schedule class
-Ethan Rogers(Project Librarian): Social aspects ( friend requests etc.)
+TO-DO: Directions to run from jar file
+
+TO-DO: Add different login account info
+Normal User Login:
+username: 
+password:
+
+Trainer Login:
+username:
+password:
+
+Admin Login:
+username:
+password:
