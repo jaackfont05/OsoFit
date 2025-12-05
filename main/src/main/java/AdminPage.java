@@ -2,6 +2,10 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import java.awt.*;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 public class AdminPage extends JFrame {
     private static user admin;
@@ -11,6 +15,7 @@ public class AdminPage extends JFrame {
     private JButton viewUsersBtn;
     private JButton viewTrainersBtn;
 
+    private JComboBox<String> userCombo;
 
     public AdminPage(user u, MySQLDatabaseConnector db) {
         this.admin = u;
@@ -43,102 +48,75 @@ public class AdminPage extends JFrame {
 
         topPanel.add(titleWrap, BorderLayout.CENTER);
         add(topPanel, BorderLayout.NORTH);
+        userCombo = new JComboBox<>();
 
-        // ===== CENTER: form column =====
-        JPanel center = new JPanel(new GridBagLayout());
-        center.setBackground(defaultSettings.BACKGROUND_COLOR);
-        add(center, BorderLayout.CENTER);
+        // Populate userCombo with emails from the database
+        try (Connection connection = db.getConnection();
+             Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery("SELECT email, role FROM users")) {
 
-        JPanel column = new JPanel();
-        column.setOpaque(false);
-        column.setLayout(new BoxLayout(column, BoxLayout.Y_AXIS));
-        column.setMaximumSize(new Dimension(520, Integer.MAX_VALUE)); // cap width
+            while (rs.next()) {
+                String email = rs.getString("email");
+                String role = rs.getString("role");
+                userCombo.addItem(email + " (" + role + ")");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Database error");
+        }
 
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.anchor = GridBagConstraints.NORTH;
-        gbc.weighty = 1;
-        center.add(column, gbc);
+        userCombo.setBackground(defaultSettings.BACKGROUND_COLOR);
+        userCombo.setPreferredSize(new Dimension(200, 30));
+        userCombo.setOpaque(false);
+        userCombo.setForeground(defaultSettings.TEXT_COLOR);
 
-        // ---- form panel ----
-        JPanel form = new JPanel(new GridBagLayout());
-        form.setOpaque(false);
-        GridBagConstraints fg = new GridBagConstraints();
-        fg.insets = new Insets(0, 12, 8, 12);
-        fg.gridy = 0;
+        JPanel centerP = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        centerP.setBackground(defaultSettings.BACKGROUND_COLOR);
+        centerP.add(userCombo, BorderLayout.CENTER);
 
-        // date row
-        fg.gridx = 0; fg.anchor = GridBagConstraints.EAST;
-        JLabel dateLbl = stdLabel("Enter date (MM/DD/YYYY):");
-        form.add(dateLbl, fg);
-
-        fg.gridx = 1; fg.anchor = GridBagConstraints.WEST;
-        JTextField dateTf = stdTextField(360);
-        dateTf.setColumns(20);
-        Dimension dateSize = dateTf.getPreferredSize();
-        dateTf.setMaximumSize(dateSize);
-        form.add(dateTf, fg);
-
-        // hours row
-        fg.gridy++; fg.gridx = 0; fg.anchor = GridBagConstraints.EAST;
-        JLabel hoursLbl = stdLabel("Hours of sleep:");
-        form.add(hoursLbl, fg);
-
-        fg.gridx = 1; fg.anchor = GridBagConstraints.WEST;
-        JTextField hoursTf = stdTextField(360);
-        hoursTf.setColumns(20);
-        Dimension hoursSize = hoursTf.getPreferredSize();
-        hoursTf.setMaximumSize(hoursSize);
-        form.add(hoursTf, fg);
-
-        // quality row
-        fg.gridy++; fg.gridx = 0; fg.anchor = GridBagConstraints.EAST;
-        JLabel qualityLbl = stdLabel("Sleep quality (1–10):");
-        form.add(qualityLbl, fg);
-
-        fg.gridx = 1; fg.anchor = GridBagConstraints.WEST;
-        JTextField qualityTf = stdTextField(360);
-        qualityTf.setColumns(20);
-        Dimension qSize = qualityTf.getPreferredSize();
-        qualityTf.setMaximumSize(qSize);
-        form.add(qualityTf, fg);
-
-        // add form to column
-        column.add(form);
-        column.add(Box.createVerticalStrut(16));
-
-
-        JPanel btnWrap = new JPanel();
-        btnWrap.setOpaque(false);
-
-        column.add(btnWrap);
-
-
+        resetPassBtn = resetB();
+        centerP.add(resetPassBtn, BorderLayout.SOUTH);
+        add(centerP, BorderLayout.CENTER);
     }
 
     private JButton resetB(){
-        JButton res = new JButton("Reset Password");
+       JButton res = new JButton("Reset");
+       res.setBackground(defaultSettings.BACKGROUND_COLOR);
+       res.setForeground(defaultSettings.TEXT_COLOR);
+       res.setFont(defaultSettings.TITLE_FONT);
 
-        res.addActionListener(e -> {
+       res.addActionListener(e -> {
+           String selected = userCombo.getSelectedItem().toString();
+           int parenIndex = selected.lastIndexOf(" (");
+           String use = selected.substring(0, parenIndex);
 
-        });
+           JPanel panel = new JPanel(new GridLayout(2, 1));
+           JLabel label = new JLabel("Enter new password for " + use + ":");
+           JPasswordField passwordField = new JPasswordField(20);
+           panel.add(label);
+           panel.add(passwordField);
 
-        return res;
+           int option = JOptionPane.showConfirmDialog(null, panel, "Reset Password", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+           if (option == JOptionPane.OK_OPTION) {
+               String newPass = new String(passwordField.getPassword());
+               if (!newPass.isEmpty()) {
+                   try {
+                       if (db.updatePass(use, newPass)) {
+                           JOptionPane.showMessageDialog(null, "Password updated");
+                       } else {
+                           JOptionPane.showMessageDialog(null, "Failed");
+                       }
+                   } catch (SQLException ex) {
+                       JOptionPane.showMessageDialog(null, "Database error");
+                   }
+               } else {
+                   JOptionPane.showMessageDialog(null, "Password cannot be empty.");
+               }
+           }
+       });
+
+       return res;
     }
 
-    private static JLabel stdLabel(String text) {
-        JLabel l = new JLabel(text);
-        l.setForeground(defaultSettings.TEXT_COLOR);
-        l.setFont(defaultSettings.LABEL_FONT);
-        return l;
-    }
 
-    private static JTextField stdTextField(int width) {
-        JTextField f = new JTextField();
-        f.setPreferredSize(new Dimension(width, 34));
-        f.setForeground(defaultSettings.TEXT_COLOR);
-        f.setBackground(defaultSettings.BACKGROUND_COLOR);
-        f.setCaretColor(defaultSettings.TEXT_COLOR);
-        f.setBorder(new LineBorder(defaultSettings.BORDER_COLOR, 2, true));
-        return f;
-    }
 }
