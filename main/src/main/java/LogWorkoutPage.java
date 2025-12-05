@@ -4,13 +4,18 @@ import java.awt.*;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class LogWorkoutPage extends JFrame {
 
     private user currentUser;
     private MySQLDatabaseConnector db;
+
     private List<Workout> workoutList = new ArrayList<>();
+    private Map<Integer, Integer> workoutIdToExerciseId = new HashMap<>();
+
     private JComboBox<Workout> workoutCB;
 
     public LogWorkoutPage(user u, MySQLDatabaseConnector db) {
@@ -22,7 +27,7 @@ public class LogWorkoutPage extends JFrame {
         setTitle("OsoFit — Log Workout Page");
         setLayout(new BorderLayout(10, 10));
 
-        // ===== NORTH: menu bar + title + red line =====
+
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setBackground(defaultSettings.BACKGROUND_COLOR);
 
@@ -49,7 +54,7 @@ public class LogWorkoutPage extends JFrame {
         topPanel.add(titleWrap, BorderLayout.CENTER);
         add(topPanel, BorderLayout.NORTH);
 
-        // ===== CENTER: combo + button =====
+
         JPanel centerPanel = new JPanel(new GridBagLayout());
         centerPanel.setBackground(defaultSettings.BACKGROUND_COLOR);
         centerPanel.setBorder(new EmptyBorder(30, 50, 30, 50));
@@ -86,13 +91,20 @@ public class LogWorkoutPage extends JFrame {
         loadWorkoutsForUser();
     }
 
-    // ===== load workouts from db for this user and populate the box =====
+    //oad workouts
     private void loadWorkoutsForUser() {
         workoutList.clear();
+        workoutIdToExerciseId.clear();
         workoutCB.removeAllItems();
 
-        String sql = "SELECT workoutId, email, type, durationMin, calories, dateTime " +
-                "FROM workouts WHERE email = ? ORDER BY dateTime DESC";
+       //updating based on requirements from db
+        String sql =
+                "SELECT w.workoutID, w.email, w.exerciseID, w.time_current, w.duration, w.calories, " +
+                        "       w.finish, e.name AS exerciseName " +
+                        "FROM Workout w " +
+                        "LEFT JOIN Exercises e ON w.exerciseID = e.exerciseID " +
+                        "WHERE w.email = ? " +
+                        "ORDER BY w.time_current DESC";
 
         try (Connection conn = MySQLDatabaseConnector.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -101,25 +113,32 @@ public class LogWorkoutPage extends JFrame {
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    int workoutId = rs.getInt("workoutId");
-                    String email = rs.getString("email");
-                    String type = rs.getString("type");
-                    int durationMin = rs.getInt("durationMin");
-                    int calories = rs.getInt("calories");
-                    Timestamp ts = rs.getTimestamp("dateTime");
+                    int workoutId   = rs.getInt("workoutID");
+                    String email    = rs.getString("email");
+                    int exerciseId  = rs.getInt("exerciseID");
+                    int duration    = rs.getInt("duration");
+                    int calories    = rs.getInt("calories");
+                    Timestamp ts    = rs.getTimestamp("time_current");
                     LocalDateTime dt = (ts != null) ? ts.toLocalDateTime() : LocalDateTime.now();
+
+                    String exerciseName = rs.getString("exerciseName");
+                    if (exerciseName == null || exerciseName.isBlank()) {
+                        exerciseName = "Exercise " + exerciseId;
+                    }
+
 
                     Workout w = new Workout(
                             workoutId,
                             email,
-                            type,
-                            durationMin,
+                            exerciseName,
+                            duration,
                             calories,
                             dt,
-                            new ArrayList<>()   // no exercises loaded here
+                            new ArrayList<>()
                     );
 
                     workoutList.add(w);
+                    workoutIdToExerciseId.put(workoutId, exerciseId);
                     workoutCB.addItem(w);
                 }
             }
@@ -135,7 +154,7 @@ public class LogWorkoutPage extends JFrame {
         }
     }
 
-    // ===== called when user clicks "Log Selected Workout" =====
+
     private void logSelectedWorkout() {
         Workout selected = (Workout) workoutCB.getSelectedItem();
         if (selected == null) {
@@ -148,20 +167,35 @@ public class LogWorkoutPage extends JFrame {
             return;
         }
 
-        // Create a NEW workout entry based on the selected one (copy type/duration/calories)
-        LocalDateTime now = LocalDateTime.now();
+        // Look up the exerciseID for this workout from map
+        int exerciseId = workoutIdToExerciseId.getOrDefault(selected.getWorkoutId(), 0);
+        if (exerciseId == 0) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Exercise ID not found for selected workout.",
+                    "Data Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+            return;
+        }
 
-        String insertSql = "INSERT INTO workouts (email, type, durationMin, calories, dateTime) " +
-                "VALUES (?, ?, ?, ?, ?)";
+        LocalDateTime now = LocalDateTime.now();
+        Timestamp nowTs = Timestamp.valueOf(now);
+
+
+        String insertSql =
+                "INSERT INTO Workout (email, exerciseID, finish, time_current, duration, calories) " +
+                        "VALUES (?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = MySQLDatabaseConnector.getConnection();
              PreparedStatement ps = conn.prepareStatement(insertSql)) {
 
             ps.setString(1, currentUser.getEmail());
-            ps.setString(2, selected.getType());
-            ps.setInt(3, selected.getDurationMin());
-            ps.setInt(4, selected.getCalories());
-            ps.setTimestamp(5, Timestamp.valueOf(now));
+            ps.setInt(2, exerciseId);
+            ps.setTimestamp(3, nowTs);                     // finish
+            ps.setTimestamp(4, nowTs);                     // time_current
+            ps.setInt(5, selected.getDurationMin());       // duration
+            ps.setInt(6, selected.getCalories());          // calories
 
             int rows = ps.executeUpdate();
 
@@ -172,7 +206,7 @@ public class LogWorkoutPage extends JFrame {
                         "Success",
                         JOptionPane.INFORMATION_MESSAGE
                 );
-                // optional: refresh combo so newest appears at top
+                // refresh combo so newest appears at top
                 loadWorkoutsForUser();
             } else {
                 JOptionPane.showMessageDialog(
