@@ -1,5 +1,6 @@
 import javax.swing.*;
 import java.sql.*;
+import java.util.ArrayList;
 
 public class MySQLDatabaseConnector {
 
@@ -146,6 +147,64 @@ public class MySQLDatabaseConnector {
             preparedStatement.setInt(6, e.reps);
             preparedStatement.setInt(7, e.sets);
             System.out.println("Saving exercise: " +  e.toString());
+            int row = preparedStatement.executeUpdate();
+            return row > 0;
+        }catch(SQLException ex){
+            JOptionPane.showMessageDialog(null, ex.getMessage());
+        }
+
+        return false;
+    }
+
+    public boolean createReminder(Reminder r, user u) throws SQLException {
+        String query = "INSERT INTO reminders (email, title, description, frequency) VALUES (?, ?, ?, ?)";
+        try(Connection connection = getConnection()) {
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, u.getEmail());
+            preparedStatement.setString(2, r.getTitle());
+            preparedStatement.setString(3, r.getDescription());
+            preparedStatement.setInt(4, r.getFrequency());
+            System.out.println("Saving reminder: " +  r.toString());
+            int row = preparedStatement.executeUpdate();
+            return row > 0;
+        }catch(SQLException ex){
+            JOptionPane.showMessageDialog(null, ex.getMessage());
+        }
+
+        return false;
+    }
+
+    public ArrayList<Reminder> getReminders(user u) throws SQLException {
+        String getReminderSQL = "SELECT * from reminders where email = ?";
+        ArrayList<Reminder> returnMe = new ArrayList<>();
+
+        try(Connection connection = getConnection()) {
+            PreparedStatement preparedStatement = connection.prepareStatement(getReminderSQL);
+            preparedStatement.setString(1, u.getEmail());
+            System.out.println("Retreiving user's reminders");
+            ResultSet rs = preparedStatement.executeQuery();
+            while(rs.next()) {
+                String email = rs.getString("email");
+                String title =  rs.getString("title");
+                String description =  rs.getString("description");
+                int frequency = rs.getInt("frequency");
+                returnMe.add(new Reminder(email, title, description, frequency));
+            }
+        }catch(SQLException ex){
+            JOptionPane.showMessageDialog(null, ex.getMessage());
+        }
+        return returnMe;
+    }
+
+    public boolean deleteReminder(Reminder r, user u) throws SQLException {
+        String query = "DELETE from reminders where email = ? and title = ? and description = ? and frequency = ?";
+        try(Connection connection = getConnection()) {
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, u.getEmail());
+            preparedStatement.setString(2, r.getTitle());
+            preparedStatement.setString(3, r.getDescription());
+            preparedStatement.setInt(4, r.getFrequency());
+            System.out.println("Deleting reminder: " +  r.toString());
             int row = preparedStatement.executeUpdate();
             return row > 0;
         }catch(SQLException ex){
