@@ -45,7 +45,7 @@ public class LogWorkoutPage extends JFrame {
         title.setFont(defaultSettings.TITLE_FONT);
         titleWrap.add(title, BorderLayout.CENTER);
 
-        // (S) red underline
+
         JPanel redLine = new JPanel();
         redLine.setBackground(new Color(220, 0, 0));
         redLine.setPreferredSize(new Dimension(1, 6));
@@ -91,13 +91,12 @@ public class LogWorkoutPage extends JFrame {
         loadWorkoutsForUser();
     }
 
-    //oad workouts
+    // ===== load workouts from db for this user and populate the box =====
     private void loadWorkoutsForUser() {
         workoutList.clear();
         workoutIdToExerciseId.clear();
         workoutCB.removeAllItems();
 
-       //updating based on requirements from db
         String sql =
                 "SELECT w.workoutID, w.email, w.exerciseID, w.time_current, w.duration, w.calories, " +
                         "       w.finish, e.name AS exerciseName " +
@@ -126,7 +125,8 @@ public class LogWorkoutPage extends JFrame {
                         exerciseName = "Exercise " + exerciseId;
                     }
 
-
+                    // Map DB columns into your Workout model:
+                    // type = exercise name, durationMin = duration, dateTime = time_current
                     Workout w = new Workout(
                             workoutId,
                             email,
@@ -134,7 +134,7 @@ public class LogWorkoutPage extends JFrame {
                             duration,
                             calories,
                             dt,
-                            new ArrayList<>()
+                            new ArrayList<>()   // no exercises loaded here
                     );
 
                     workoutList.add(w);
@@ -167,7 +167,7 @@ public class LogWorkoutPage extends JFrame {
             return;
         }
 
-        // Look up the exerciseID for this workout from map
+        // Look up the exerciseID for this workout from our map
         int exerciseId = workoutIdToExerciseId.getOrDefault(selected.getWorkoutId(), 0);
         if (exerciseId == 0) {
             JOptionPane.showMessageDialog(
