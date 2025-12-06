@@ -1,6 +1,7 @@
 import javax.swing.*;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class MySQLDatabaseConnector {
 
@@ -212,6 +213,46 @@ public class MySQLDatabaseConnector {
         }
 
         return false;
+    }
+
+    public boolean createStatistic(Statistic s, user u) throws SQLException {
+        String query = "INSERT INTO Stats (email, date_time, weight_pounds, steps) VALUES (?, ?, ?, ?)";
+        try(Connection connection = getConnection()) {
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, u.getEmail());
+            preparedStatement.setDate(2,s.getDate());
+            preparedStatement.setLong(3, s.getWeight());
+            preparedStatement.setInt(4, s.getSteps());
+            System.out.println("Saving statistic: " +  s.toString());
+            int row = preparedStatement.executeUpdate();
+            return row > 0;
+        }catch(SQLException ex){
+            JOptionPane.showMessageDialog(null, ex.getMessage());
+        }
+
+        return false;
+    }
+
+    public ArrayList<Statistic> getStatistics(user u){
+        ArrayList<Statistic> returnMe = new ArrayList<>();
+        String query = "SELECT * from Stats where email = ?";
+        try(Connection connection = getConnection()) {
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, u.getEmail());
+            ResultSet rs = preparedStatement.executeQuery();
+            while(rs.next()) {
+                String email = rs.getString("email");
+                Date dateTime = rs.getDate("date_time");
+                Long weight = rs.getLong("weight_pounds");
+                int steps = rs.getInt("steps");
+                returnMe.add(new Statistic(email, dateTime, weight, steps));
+            }
+            Collections.sort(returnMe);
+        }catch(SQLException ex){
+            System.out.println("Error retrieving statistics");
+        }
+
+        return returnMe;
     }
 
 }
