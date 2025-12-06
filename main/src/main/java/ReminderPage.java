@@ -1,9 +1,17 @@
+/**
+ *  Mason Baxter
+ *  Creates and displays the page for user's to add, view, and delete their daily reminders
+ */
+
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 
 public class ReminderPage extends JFrame {
     private user u;
@@ -49,6 +57,7 @@ public class ReminderPage extends JFrame {
         //The main panel that will include two sub panels, one to create reminders and one to view/delete
         JPanel mainPanel = new JPanel(new GridLayout());
         mainPanel.setBackground(defaultSettings.BACKGROUND_COLOR);
+        mainPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 
         Border redBorder = BorderFactory.createLineBorder(Color.red, 5);
         Border lightBorder = BorderFactory.createLineBorder(new Color(255, 138, 138), 5);
@@ -141,7 +150,16 @@ public class ReminderPage extends JFrame {
             //to do
             @Override
             public void actionPerformed(ActionEvent e) {
-
+                try {
+                    String title = titleTextField.getText();
+                    String description = descriptionTextField.getText();
+                    int frequency = Integer.parseInt(frequencyTextField.getText());
+                    db.createReminder(new Reminder(u.getEmail(), title, description, frequency), u);
+                    new ReminderPage(u,db).setVisible(true);
+                    dispose();
+                }catch(SQLException ex){
+                    System.out.println("Error adding new reminder.");
+                }
             }
         });
 
@@ -162,9 +180,146 @@ public class ReminderPage extends JFrame {
         viewLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         viewPanel.add(viewLabel);
 
+        viewPanel.add(Box.createVerticalStrut(createSpacing));
+
         //Display all the reminders with ability to remove them
+        try {
+            ArrayList<Reminder> reminders = db.getReminders(u);
+            for(Reminder r : reminders) {
+                JPanel reminderPanel = new JPanel();
+                reminderPanel.setBackground(defaultSettings.BACKGROUND_COLOR);
+                reminderPanel.setLayout(new BoxLayout(reminderPanel, BoxLayout.X_AXIS));
+                reminderPanel.setBorder(new EmptyBorder(5,10,5,10));
+
+                JTextArea reminderTextArea = new JTextArea(r.toString());
+                reminderTextArea.setLineWrap(true);
+                reminderTextArea.setPreferredSize(new Dimension(150, 30));
+                reminderTextArea.setBackground(defaultSettings.BACKGROUND_COLOR);
+                reminderTextArea.setForeground(defaultSettings.TEXT_COLOR);
+                reminderTextArea.setBorder(lightBorder);
+                reminderPanel.add(reminderTextArea);
+
+                reminderPanel.add(Box.createHorizontalStrut(10));
+
+                JButton deleteReminderButton = new JButton("Delete this Reminder");
+                deleteReminderButton.setBackground(defaultSettings.BACKGROUND_COLOR);
+                deleteReminderButton.setForeground(defaultSettings.TEXT_COLOR);
+                deleteReminderButton.setFont(defaultSettings.BUTTON_FONT);
+                deleteReminderButton.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        ConfirmationDialog cd = makeConfirmationDialog(r,u);
+                    }
+                });
+                reminderPanel.add(deleteReminderButton);
+
+                viewPanel.add(reminderPanel);
+
+                viewPanel.add(Box.createVerticalStrut(createSpacing));
+            }
+        } catch (SQLException e){
+            System.out.println("An error occured when trying to get reminders.");
+        }
+
+
+
         mainPanel.add(viewPanel);
 
         add(mainPanel, BorderLayout.CENTER);
+    }
+
+    public ConfirmationDialog makeConfirmationDialog(Reminder r, user u){
+        return new ConfirmationDialog(this,r,u);
+    }
+
+
+    public class ConfirmationDialog extends JDialog {
+        private ReminderPage owner;
+        private Reminder r;
+        private user u;
+
+        public ConfirmationDialog(ReminderPage owner, Reminder r, user u) {
+            super();
+            this.owner = owner;
+            this.r = r;
+            this.u = u;
+            createGUI();
+        }
+
+        public void createGUI() {
+            this.setPreferredSize(new Dimension(500, 200));
+            this.setTitle("Confirmation Dialog");
+
+            JPanel confirmationPanel = new JPanel();
+            confirmationPanel.setBackground(defaultSettings.BACKGROUND_COLOR);
+            confirmationPanel.setLayout(new BoxLayout(confirmationPanel, BoxLayout.Y_AXIS));
+
+            JLabel titleLabel = new JLabel("Are you sure you want to delete this reminder?", SwingConstants.CENTER);
+            titleLabel.setBackground(defaultSettings.BACKGROUND_COLOR);
+            titleLabel.setForeground(defaultSettings.TEXT_COLOR);
+            titleLabel.setFont(defaultSettings.TITLE_FONT.deriveFont(24f));
+            titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+            confirmationPanel.add(titleLabel);
+
+            JPanel redLine = new JPanel();
+            redLine.setBackground(new Color(220, 0, 0));
+            redLine.setPreferredSize(new Dimension(1, 6));
+            confirmationPanel.add(redLine);
+
+            confirmationPanel.add(Box.createVerticalStrut(10));
+
+            JTextArea reminderText = new JTextArea(r.toString());
+            reminderText.setLineWrap(true);
+            reminderText.setPreferredSize(new Dimension(300, 100));
+            reminderText.setBackground(defaultSettings.BACKGROUND_COLOR);
+            reminderText.setForeground(defaultSettings.TEXT_COLOR);
+
+            confirmationPanel.add(reminderText);
+
+            confirmationPanel.add(Box.createVerticalStrut(10));
+
+            JPanel buttonPanel = new JPanel();
+            buttonPanel.setBackground(defaultSettings.BACKGROUND_COLOR);
+            buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
+
+            JButton yesButton = new JButton("Yes");
+            yesButton.setBackground(defaultSettings.BACKGROUND_COLOR);
+            yesButton.setForeground(defaultSettings.TEXT_COLOR);
+            yesButton.setFont(defaultSettings.BUTTON_FONT);
+            yesButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    try{
+                        db.deleteReminder(r, u);
+                        new ReminderPage(u, db).setVisible(true);
+                        owner.dispose();
+                        dispose();
+                    }catch(SQLException ex){
+                        System.out.println("Error deleting reminder.");
+                    }
+                }
+            });
+            buttonPanel.add(yesButton);
+
+            buttonPanel.add(Box.createHorizontalStrut(10));
+
+            JButton noButton = new JButton("No");
+            noButton.setBackground(defaultSettings.BACKGROUND_COLOR);
+            noButton.setForeground(defaultSettings.TEXT_COLOR);
+            noButton.setFont(defaultSettings.BUTTON_FONT);
+            noButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    dispose();
+                }
+            });
+            buttonPanel.add(noButton);
+
+            confirmationPanel.add(buttonPanel);
+            this.add(confirmationPanel);
+            this.pack();
+            setVisible(true);
+        }
     }
 }

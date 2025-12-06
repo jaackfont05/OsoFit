@@ -1,3 +1,8 @@
+/**
+ * Created by Mason Baxter
+ *  The reminder class, which allows users to set and track their daily tasks
+ */
+
 public class Reminder {
     private String email;
     private String title;
