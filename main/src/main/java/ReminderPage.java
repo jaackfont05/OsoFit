@@ -57,6 +57,7 @@ public class ReminderPage extends JFrame {
         //The main panel that will include two sub panels, one to create reminders and one to view/delete
         JPanel mainPanel = new JPanel(new GridLayout());
         mainPanel.setBackground(defaultSettings.BACKGROUND_COLOR);
+        mainPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 
         Border redBorder = BorderFactory.createLineBorder(Color.red, 5);
         Border lightBorder = BorderFactory.createLineBorder(new Color(255, 138, 138), 5);
