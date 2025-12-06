@@ -47,6 +47,6 @@ public class Statistic implements Comparable<Statistic> {
     }
 
     public int compareTo(Statistic other){
-        return date.compareTo(other.date);
+        return (-1) * date.compareTo(other.date);
     }
 }

@@ -203,17 +203,21 @@ public class StatsPage extends JFrame {
 
         for(Statistic s : stats){
             JTextField statField = new JTextField(s.toString());
-            statField.setSize(new Dimension(100,100));
+            statField.setPreferredSize(new Dimension(statPanel.getWidth(),100));
             statField.setAlignmentX(Component.CENTER_ALIGNMENT);
             statField.setBackground(defaultSettings.BACKGROUND_COLOR);
             statField.setForeground(defaultSettings.TEXT_COLOR);
             statField.setBorder(lightBorder);
+
+            statField.setMaximumSize(new Dimension(Integer.MAX_VALUE,200));
 
             statPanel.add(statField);
             statPanel.add(Box.createVerticalStrut(10));
         }
 
         JScrollPane scrollPane = new JScrollPane(statPanel);
+        scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
         viewPanel.add(scrollPane);
 
