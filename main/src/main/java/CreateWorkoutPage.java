@@ -3,8 +3,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.sql.*;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
+import java.time.LocalDate;
 
 public class CreateWorkoutPage extends JFrame {
 
@@ -153,7 +152,7 @@ public class CreateWorkoutPage extends JFrame {
         loadExercisesForUser();
     }
 
-    // ===== UI helpers (same style as exercisePage) =====
+    // ===== UI helpers =====
     private static JLabel stdLabel(String text) {
         JLabel l = new JLabel(text);
         l.setForeground(defaultSettings.TEXT_COLOR);
@@ -261,9 +260,9 @@ public class CreateWorkoutPage extends JFrame {
             return;
         }
 
-        // Format time as a short string so it fits the 'finish' and 'time_current' columns
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
-        String timeStr = LocalTime.now().format(formatter);
+        // === IMPORTANT PART: write a DATE, not a time string ===
+        LocalDate today = LocalDate.now();
+        java.sql.Date sqlDate = java.sql.Date.valueOf(today);  // "YYYY-MM-DD"
 
         String insertSql =
                 "INSERT INTO Workout (email, workoutID, exerciseID, finish, time_current, duration, calories) " +
@@ -275,12 +274,12 @@ public class CreateWorkoutPage extends JFrame {
             int newWorkoutId = getNextWorkoutIdForUser(conn);
 
             ps.setString(1, u.getEmail());
-            ps.setInt(2, newWorkoutId);      // workoutID
-            ps.setInt(3, selected.id);       // exerciseID
-            ps.setString(4, timeStr);        // finish (short time string)
-            ps.setString(5, timeStr);        // time_current (same)
-            ps.setInt(6, duration);          // duration
-            ps.setInt(7, calories);          // calories
+            ps.setInt(2, newWorkoutId);     // workoutID
+            ps.setInt(3, selected.id);      // exerciseID
+            ps.setDate(4, sqlDate);         // finish (DATE)
+            ps.setDate(5, sqlDate);         // time_current (DATE)
+            ps.setInt(6, duration);         // duration
+            ps.setInt(7, calories);         // calories
 
             int rows = ps.executeUpdate();
 
@@ -313,3 +312,4 @@ public class CreateWorkoutPage extends JFrame {
         }
     }
 }
+
