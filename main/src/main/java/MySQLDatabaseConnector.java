@@ -221,7 +221,7 @@ public class MySQLDatabaseConnector {
             PreparedStatement preparedStatement = connection.prepareStatement(query);
             preparedStatement.setString(1, u.getEmail());
             preparedStatement.setDate(2,s.getDate());
-            preparedStatement.setLong(3, s.getWeight());
+            preparedStatement.setDouble(3, s.getWeight());
             preparedStatement.setInt(4, s.getSteps());
             System.out.println("Saving statistic: " +  s.toString());
             int row = preparedStatement.executeUpdate();
@@ -243,7 +243,7 @@ public class MySQLDatabaseConnector {
             while(rs.next()) {
                 String email = rs.getString("email");
                 Date dateTime = rs.getDate("date_time");
-                Long weight = rs.getLong("weight_pounds");
+                double weight = rs.getDouble("weight_pounds");
                 int steps = rs.getInt("steps");
                 returnMe.add(new Statistic(email, dateTime, weight, steps));
             }
