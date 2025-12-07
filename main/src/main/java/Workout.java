@@ -36,10 +36,12 @@ public class Workout {
     public void setDurationMin(int durationMin) { this.durationMin = durationMin; }
     public void setCalories(int calories) { this.calories = calories; }
     public void setDateTime(LocalDateTime dateTime) { this.dateTime = dateTime; }
+
     @Override
     public String toString() {
 
         return type + " — " + durationMin + " min, " + calories + " cal";
     }
+
 
 }

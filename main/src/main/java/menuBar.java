@@ -80,7 +80,7 @@ public class menuBar extends JPanel {
             new SetGoalsPage(db, currentUser).setVisible(true);
         });
 
-        sleepBtn = otherFeatureBtn(" Log Sleep ", new Color(200, 40, 40));
+        sleepBtn = otherFeatureBtn(" Log Sleep & Sleep Goals ", new Color(200, 40, 40));
 
         sleepBtn.addActionListener(e -> {
             if (owner instanceof sleepPage) {
