@@ -240,6 +240,8 @@ public class sleepGoalsPage extends JFrame {
 
             goalPanel.add(sleepField);
 
+            goalPanel.add(Box.createHorizontalStrut(10));
+
             JButton deleteGoalButton = new JButton("Delete Goal");
             deleteGoalButton.setBackground(defaultSettings.BACKGROUND_COLOR);
             deleteGoalButton.setForeground(defaultSettings.TEXT_COLOR);

@@ -294,6 +294,23 @@ public class MySQLDatabaseConnector {
         return returnMe;
     }
 
+    public boolean deleteSleep(Sleep s, user u) throws SQLException {
+        String query = "DELETE from Sleep where email = ? and hours = ? and quality = ? and date = ?";
+        try(Connection connection = getConnection()) {
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, u.getEmail());
+            preparedStatement.setInt(2, s.getHours());
+            preparedStatement.setInt(3, s.getQuality());
+            preparedStatement.setDate(4, s.getDate());
+            System.out.println("Deleting sleep record: " +  s.toString());
+            int row = preparedStatement.executeUpdate();
+            return row > 0;
+        }catch(SQLException ex){
+            JOptionPane.showMessageDialog(null, ex.getMessage());
+        }
+        return false;
+    }
+
     public boolean createSleepGoal(sleepGoal g, user u) {
         String query = "INSERT INTO SleepGoals (email, totalHours, currentHours, minQuality, startDate, endDate) VALUES (?, ?, ?, ?, ?, ?)";
         try(Connection connection = getConnection()) {
