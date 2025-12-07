@@ -1,15 +1,20 @@
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.Date;
+import java.util.ArrayList;
 
 public class sleepPage extends JFrame {
 
-    private final user currentUser;
+    private final user u;
     private MySQLDatabaseConnector db;
 
     public sleepPage(user currentUser, MySQLDatabaseConnector db) {
-        this.currentUser = currentUser;
+        this.u = currentUser;
         this.db = db;
 
         // Apply shared defaults
@@ -44,10 +49,27 @@ public class sleepPage extends JFrame {
         topPanel.add(titleWrap, BorderLayout.CENTER);
         add(topPanel, BorderLayout.NORTH);
 
-        // ===== CENTER: form column =====
-        JPanel center = new JPanel(new GridBagLayout());
-        center.setBackground(defaultSettings.BACKGROUND_COLOR);
-        add(center, BorderLayout.CENTER);
+        JPanel centerPanel = new JPanel();
+        centerPanel.setBackground(defaultSettings.BACKGROUND_COLOR);
+        centerPanel.setLayout(new GridLayout());
+        centerPanel.setBorder(new EmptyBorder(5,5,5,5));
+
+        //Panel to make new sleep record
+
+        JPanel addPanel = new JPanel();
+        addPanel.setLayout(new BoxLayout(addPanel, BoxLayout.Y_AXIS));
+        addPanel.setBackground(defaultSettings.BACKGROUND_COLOR);
+        addPanel.setBorder(new LineBorder(Color.red,5));
+        add(centerPanel, BorderLayout.CENTER);
+
+        JLabel addLabel = new JLabel("Log New Sleep Record:");
+        addLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        addLabel.setBackground(defaultSettings.BACKGROUND_COLOR);
+        addLabel.setForeground(defaultSettings.TEXT_COLOR);
+        addLabel.setFont(defaultSettings.LABEL_FONT);
+        addPanel.add(addLabel);
+
+        addPanel.add(Box.createVerticalStrut(10));
 
         JPanel column = new JPanel();
         column.setOpaque(false);
@@ -57,7 +79,7 @@ public class sleepPage extends JFrame {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.anchor = GridBagConstraints.NORTH;
         gbc.weighty = 1;
-        center.add(column, gbc);
+        addPanel.add(column, gbc);
 
         // ---- form panel ----
         JPanel form = new JPanel(new GridBagLayout());
@@ -68,7 +90,7 @@ public class sleepPage extends JFrame {
 
         // date row
         fg.gridx = 0; fg.anchor = GridBagConstraints.EAST;
-        JLabel dateLbl = stdLabel("Enter date (MM/DD/YYYY):");
+        JLabel dateLbl = stdLabel("Enter date (YYYY-MM-DD):");
         form.add(dateLbl, fg);
 
         fg.gridx = 1; fg.anchor = GridBagConstraints.WEST;
@@ -114,15 +136,88 @@ public class sleepPage extends JFrame {
         column.add(btnWrap);
 
         // simple placeholder logic for now
-        saveBtn.addActionListener(e -> {
-
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Sleep entry recorded (UI only – DB logic later).",
-                    "Sleep Saved",
-                    JOptionPane.INFORMATION_MESSAGE
-            );
+        saveBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+               Date date = Date.valueOf(dateTf.getText());
+               int  hours = Integer.parseInt(hoursTf.getText());
+               int  quality = Integer.parseInt(qualityTf.getText());
+               db.createSleep(new Sleep(u.getEmail(),hours,quality,date),u);
+               new sleepPage(u,db).setVisible(true);
+               dispose();
+            }
         });
+
+        centerPanel.add(addPanel);
+
+        //Panel to view sleep records
+
+        Border lightBorder = BorderFactory.createLineBorder(new Color(255, 138, 138), 5);
+
+        JPanel rightSide = new JPanel();
+        rightSide.setBackground(defaultSettings.BACKGROUND_COLOR);
+        rightSide.setLayout(new BoxLayout(rightSide, BoxLayout.Y_AXIS));
+        rightSide.setBorder(new LineBorder(Color.red,5));
+
+        JPanel viewPanel = new JPanel();
+        viewPanel.setBackground(defaultSettings.BACKGROUND_COLOR);
+        viewPanel.setPreferredSize(new Dimension(rightSide.getWidth(), (rightSide.getHeight() * 3 / 4)));
+        viewPanel.setLayout(new BoxLayout(viewPanel,BoxLayout.Y_AXIS));
+
+        JLabel viewLabel = new JLabel("Your Sleep History: ");
+        viewLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        viewLabel.setBackground(defaultSettings.BACKGROUND_COLOR);
+        viewLabel.setForeground(defaultSettings.TEXT_COLOR);
+        viewLabel.setFont(defaultSettings.LABEL_FONT);
+
+        viewPanel.add(viewLabel);
+
+        viewPanel.add(Box.createVerticalStrut(10));
+
+        JPanel sleepPanel = new JPanel();
+        sleepPanel.setBackground(defaultSettings.BACKGROUND_COLOR);
+        sleepPanel.setLayout(new BoxLayout(sleepPanel,BoxLayout.Y_AXIS));
+        sleepPanel.setBorder(new EmptyBorder(5,10,5,10));
+
+        ArrayList<Sleep> sleepRecords = db.getSleepRecords(u);
+
+        for(Sleep s : sleepRecords){
+            JTextField sleepField = new JTextField(s.toString());
+            sleepField.setPreferredSize(new Dimension(sleepPanel.getWidth(),100));
+            sleepField.setAlignmentX(Component.CENTER_ALIGNMENT);
+            sleepField.setBackground(defaultSettings.BACKGROUND_COLOR);
+            sleepField.setForeground(defaultSettings.TEXT_COLOR);
+            sleepField.setBorder(lightBorder);
+
+            sleepField.setMaximumSize(new Dimension(Integer.MAX_VALUE,200));
+
+            sleepPanel.add(sleepField);
+            sleepPanel.add(Box.createVerticalStrut(10));
+        }
+
+        JScrollPane scrollPane = new JScrollPane(sleepPanel);
+        scrollPane.setBackground(defaultSettings.BACKGROUND_COLOR);
+        scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+
+        viewPanel.add(scrollPane);
+
+        rightSide.add(viewPanel);
+
+        JButton sleepGoalsButton = new JButton("Create & View Sleep Goals");
+        sleepGoalsButton.setBackground(defaultSettings.BACKGROUND_COLOR);
+        sleepGoalsButton.setForeground(defaultSettings.TEXT_COLOR);
+        sleepGoalsButton.setFont(defaultSettings.BUTTON_FONT);
+        sleepGoalsButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        sleepGoalsButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e){
+                //TO-DO: Create & Display Sleep Goals Page
+            }
+        });
+
+        rightSide.add(sleepGoalsButton);
+        centerPanel.add(rightSide);
     }
 
 

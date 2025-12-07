@@ -255,4 +255,42 @@ public class MySQLDatabaseConnector {
         return returnMe;
     }
 
+    public boolean createSleep(Sleep s, user u) {
+        String query = "INSERT INTO Sleep (email, hours, quality, date) VALUES (?, ?, ?, ?)";
+        try(Connection connection = getConnection()) {
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, u.getEmail());
+            preparedStatement.setInt(2,s.getHours());
+            preparedStatement.setInt(3, s.getQuality());
+            preparedStatement.setDate(4, s.getDate());
+            int row = preparedStatement.executeUpdate();
+            return row > 0;
+        }catch(SQLException ex){
+            JOptionPane.showMessageDialog(null, ex.getMessage());
+        }
+        return false;
+    }
+
+    public ArrayList<Sleep> getSleepRecords(user u){
+        ArrayList<Sleep> returnMe = new ArrayList<>();
+        String query = "SELECT * from Sleep where email = ?";
+        try(Connection connection = getConnection()) {
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, u.getEmail());
+            ResultSet rs = preparedStatement.executeQuery();
+            while(rs.next()) {
+                String email = rs.getString("email");
+                int hours = rs.getInt("hours");
+                int quality = rs.getInt("quality");
+                Date date = rs.getDate("date");
+                returnMe.add(new Sleep(email, hours, quality, date));
+            }
+            Collections.sort(returnMe);
+        }catch(SQLException ex){
+            System.out.println("Error retrieving sleep records");
+        }
+
+        return returnMe;
+    }
+
 }

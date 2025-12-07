@@ -216,6 +216,7 @@ public class StatsPage extends JFrame {
         }
 
         JScrollPane scrollPane = new JScrollPane(statPanel);
+        scrollPane.setBackground(defaultSettings.BACKGROUND_COLOR);
         scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
         scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
