@@ -212,7 +212,8 @@ public class sleepPage extends JFrame {
         sleepGoalsButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e){
-                //TO-DO: Create & Display Sleep Goals Page
+                new sleepGoalsPage(u,db).setVisible(true);
+                dispose();
             }
         });
 

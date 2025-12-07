@@ -2,7 +2,7 @@
 
 import java.sql.Date;
 
-public class sleepGoal {
+public class sleepGoal implements Comparable<sleepGoal>{
     String email;
     int numTotalHours;
     int currentHours;
@@ -10,7 +10,7 @@ public class sleepGoal {
     Date startDate;
     Date endDate;
 
-    public sleepGoal(String email, int totalHours, int minQuality, Date startDate, Date finalDate){
+    public sleepGoal(String email, int totalHours, int currentHours, int minQuality, Date startDate, Date finalDate){
         this.email = email;
         numTotalHours = totalHours;
         currentHours = 0;
@@ -19,11 +19,11 @@ public class sleepGoal {
         endDate = finalDate;
     }
 
-    public sleepGoal(String email, int totalHours, Date startDate, Date finalDate){
+    public sleepGoal(String email, int totalHours, int minQuality, Date startDate, Date finalDate){
         this.email = email;
         numTotalHours = totalHours;
         currentHours = 0;
-        minimumQuality = 1;
+        minimumQuality = minQuality;
         this.startDate = startDate;
         endDate = finalDate;
     }
@@ -42,6 +42,25 @@ public class sleepGoal {
 
     public Date getEndDate(){return endDate;}
 
+    public void setHourProgress(int hourProgress){
+        currentHours = hourProgress;
+    }
 
+    public String toString(){
+        String returnMe = "";
+        returnMe += "Get " + numTotalHours;
+        returnMe += " total hours of sleep between the dates of ";
+        returnMe += startDate.toString() + " and " + endDate.toString();
+        returnMe += "\n";
+        returnMe += "Minimum Sleep Quality to Count towards goal: " + minimumQuality;
+        returnMe += "\n";
+        returnMe += "Current Progress: " +  currentHours;
+        returnMe += "/" + numTotalHours;
+        return returnMe;
+    }
+
+    public int compareTo(sleepGoal other){
+        return (-1) * endDate.compareTo(other.endDate);
+    }
 
 }

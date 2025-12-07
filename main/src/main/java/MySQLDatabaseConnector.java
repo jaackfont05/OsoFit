@@ -264,6 +264,7 @@ public class MySQLDatabaseConnector {
             preparedStatement.setInt(3, s.getQuality());
             preparedStatement.setDate(4, s.getDate());
             int row = preparedStatement.executeUpdate();
+            updateHourProgress(s,u);
             return row > 0;
         }catch(SQLException ex){
             JOptionPane.showMessageDialog(null, ex.getMessage());
@@ -291,6 +292,119 @@ public class MySQLDatabaseConnector {
         }
 
         return returnMe;
+    }
+
+    public boolean createSleepGoal(sleepGoal g, user u) {
+        String query = "INSERT INTO SleepGoals (email, totalHours, currentHours, minQuality, startDate, endDate) VALUES (?, ?, ?, ?, ?, ?)";
+        try(Connection connection = getConnection()) {
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, u.getEmail());
+            preparedStatement.setInt(2,g.getTotalHours());
+            preparedStatement.setInt(3, getHourProgress(g, u));
+            preparedStatement.setInt(4,g.getMinimumQuality());
+            preparedStatement.setDate(5,g.getStartDate());
+            preparedStatement.setDate(6,g.getEndDate());
+            int row = preparedStatement.executeUpdate();
+            return row > 0;
+        }catch(SQLException ex){
+            JOptionPane.showMessageDialog(null, ex.getMessage());
+        }
+        return false;
+    }
+
+    public int getHourProgress(sleepGoal g, user u) {
+        String query = "SELECT * FROM Sleep WHERE email = ? AND date BETWEEN ? and ?";
+        int count = 0;
+        try(Connection connection = getConnection()) {
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, u.getEmail());
+            preparedStatement.setDate(2,g.getStartDate());
+            preparedStatement.setDate(3,g.getEndDate());
+            ResultSet rs = preparedStatement.executeQuery();
+            while(rs.next()) {
+                count += rs.getInt("hours");
+            }
+        }catch(SQLException ex){
+            JOptionPane.showMessageDialog(null, ex.getMessage());
+        }
+        g.setHourProgress(count);
+        return count;
+    }
+
+    public int updateHourProgress(Sleep s, user u) {
+        ArrayList<sleepGoal> sleepGoals = getSleepGoals(u);
+        int count = 0;
+        int updatedHours;
+        for(sleepGoal sg : sleepGoals) {
+            updatedHours = getHourProgress(sg, u);
+            if((s.getDate().compareTo(sg.getStartDate()) > 1) && (s.getDate().compareTo(sg.getEndDate()) < 1)) {
+                if (s.getQuality() >= sg.getMinimumQuality()) {
+                    updatedHours += s.getHours();
+                    String query = "UPDATE sleepGoal SET currentHours = ? WHERE " +
+                            "email = ? and totalHours = ? and currentHours = ? and minQuality = ? and startDate = ? and endDate = ?";
+                    try(Connection connection = getConnection()) {
+                        PreparedStatement preparedStatement = connection.prepareStatement(query);
+                        preparedStatement.setInt(1, updatedHours);
+                        preparedStatement.setString(2, u.getEmail());
+                        preparedStatement.setInt(3, sg.getTotalHours());
+                        preparedStatement.setInt(4, sg.getMinimumQuality());
+                        preparedStatement.setDate(5,sg.getStartDate());
+                        preparedStatement.setDate(6,sg.getEndDate());
+                        ResultSet rs = preparedStatement.executeQuery();
+                        count++;
+                    }catch(SQLException ex){
+                        System.out.println("Error updating sleep records");
+                    }
+                }
+            }
+        }
+        return count;
+    }
+
+    public ArrayList<sleepGoal> getSleepGoals(user u){
+        ArrayList<sleepGoal> returnMe = new ArrayList<>();
+        String query = "SELECT * from SleepGoals where email = ?";
+        try(Connection connection = getConnection()) {
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, u.getEmail());
+            ResultSet rs = preparedStatement.executeQuery();
+            while(rs.next()) {
+                String email = rs.getString("email");
+                int totalHours = rs.getInt("totalHours");
+                int currentHours = rs.getInt("currentHours");
+                int quality = rs.getInt("minQuality");
+                Date startDate = rs.getDate("startDate");
+                Date endDate = rs.getDate("endDate");
+                returnMe.add(new sleepGoal(email, totalHours, currentHours, quality, startDate, endDate));
+            }
+            Collections.sort(returnMe);
+        }catch(SQLException ex){
+            System.out.println("Error retrieving sleep records");
+        }
+
+        return returnMe;
+    }
+
+    public boolean deleteSleepGoal(sleepGoal sg, user u) throws SQLException {
+        String query = "DELETE from SleepGoals where email = ? and totalHours = ? and currentHours = ? and minQuality = ? " +
+                "and startDate = ? and endDate = ?";
+        try(Connection connection = getConnection()) {
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, u.getEmail());
+            preparedStatement.setInt(2, sg.getTotalHours());
+            preparedStatement.setInt(3, sg.getCurrentHours());
+            preparedStatement.setInt(4, sg.getMinimumQuality());
+            preparedStatement.setDate(5,sg.getStartDate());
+            preparedStatement.setDate(6,sg.getEndDate());
+            System.out.println("Deleting reminder: " +  sg.toString());
+            int row = preparedStatement.executeUpdate();
+            System.out.println(row);
+            return row > 0;
+        }catch(SQLException ex){
+            JOptionPane.showMessageDialog(null, ex.getMessage());
+        }
+
+        return false;
     }
 
 }
