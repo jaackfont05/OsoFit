@@ -424,4 +424,23 @@ public class MySQLDatabaseConnector {
         return false;
     }
 
+    //meal stuff
+    public boolean createMeal(Meal m, user u) throws SQLException {
+        String query = "INSERT INTO Meals (email, name, mealDate, calories) VALUES (?, ?, ?, ?)";
+        try (Connection connection = getConnection()) {
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, u.getEmail());
+            preparedStatement.setString(2, m.name);
+            preparedStatement.setDate(3, new java.sql.Date(System.currentTimeMillis()));
+            preparedStatement.setInt(4, m.calories);
+            System.out.println("Saving meal: " + m.name + ", calories: " + m.calories);
+            int row = preparedStatement.executeUpdate();
+            return row > 0;
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, ex.getMessage());
+        }
+
+
+        return false;
+    }
 }
