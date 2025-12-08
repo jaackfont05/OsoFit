@@ -89,7 +89,7 @@ public class ReminderPage extends JFrame {
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         titlePanel.add(titleLabel);
 
-        JTextField titleTextField = new JTextField("Replace this with the title of your reminder.");
+        JTextField titleTextField = new JTextField("");
         titleTextField.setBackground(defaultSettings.BACKGROUND_COLOR);
         titleTextField.setForeground(defaultSettings.TEXT_COLOR);
         titleTextField.setBorder(lightBorder);
@@ -103,14 +103,14 @@ public class ReminderPage extends JFrame {
         descriptionPanel.setBackground(defaultSettings.BACKGROUND_COLOR);
         descriptionPanel.setBorder(new EmptyBorder(5, 10, 5, 10));
 
-        JLabel descriptionLabel = new JLabel("Description: ");
+        JLabel descriptionLabel = new JLabel("Description (optional): ");
         descriptionLabel.setPreferredSize(new Dimension(100, 100));
         descriptionLabel.setForeground(defaultSettings.TEXT_COLOR);
         descriptionLabel.setBackground(defaultSettings.BACKGROUND_COLOR);
         descriptionLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         descriptionPanel.add(descriptionLabel);
 
-        JTextArea descriptionTextField = new JTextArea("The description is optional. \n Please delete this text and leave the field blank if you do not want a description.");
+        JTextArea descriptionTextField = new JTextArea("");
         descriptionTextField.setLineWrap(true);
         descriptionTextField.setBackground(defaultSettings.BACKGROUND_COLOR);
         descriptionTextField.setForeground(defaultSettings.TEXT_COLOR);
@@ -132,7 +132,7 @@ public class ReminderPage extends JFrame {
         frequencyLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         frequencyPanel.add(frequencyLabel);
 
-        JTextField frequencyTextField = new JTextField("Replace this text with a number greater than 0");
+        JTextField frequencyTextField = new JTextField("");
         frequencyTextField.setBackground(defaultSettings.BACKGROUND_COLOR);
         frequencyTextField.setForeground(defaultSettings.TEXT_COLOR);
         frequencyTextField.setBorder(lightBorder);
