@@ -17,7 +17,7 @@ public class defaultSettings {
     //Note: you should call this function before you create your customized UI, otherwise may have bugs.
     public static void setDefault(JFrame frame) {
         frame.getContentPane().setBackground(BACKGROUND_COLOR);
-        frame.setSize(1200, 800);
+        frame.setSize(1300, 800);
         //frame.setExtendedState(JFrame.MAXIMIZED_BOTH); //maybe we can discuss whether to use full screen or not later
         frame.setLocationRelativeTo(null);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

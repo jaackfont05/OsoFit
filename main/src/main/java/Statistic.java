@@ -8,10 +8,10 @@ import java.sql.Date;
 public class Statistic implements Comparable<Statistic> {
     private String email;
     private Date date;
-    private long weight;
+    private double weight;
     private int steps;
 
-    public Statistic(String email, Date date, long weight, int steps) {
+    public Statistic(String email, Date date, double weight, int steps) {
         this.email = email;
         this.date = date;
         this.weight = weight;
@@ -26,7 +26,7 @@ public class Statistic implements Comparable<Statistic> {
         return date;
     }
 
-    public long getWeight(){
+    public double getWeight(){
         return weight;
     }
 
