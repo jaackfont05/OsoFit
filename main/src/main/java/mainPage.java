@@ -74,8 +74,15 @@ public class mainPage extends JFrame {
         welcome.setBorder(new EmptyBorder(40, 0, 20, 0));
         center.add(welcome, BorderLayout.NORTH);
 
+       //HIDE STATS FOR TRAINERS
+        if (currentUser != null && "trainer".equalsIgnoreCase(currentUser.getRole())) {
+            // Trainer: just show the welcome banner, no stats cards
+            add(center, BorderLayout.CENTER);
+            return; // stop here, do NOT build the 3 columns
+        }
 
         JPanel statsRow = new JPanel(new GridLayout(1, 3, 30, 0));
+
         statsRow.setOpaque(false);
         statsRow.setBorder(new EmptyBorder(10, 80, 40, 80));
 

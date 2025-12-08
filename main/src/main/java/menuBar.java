@@ -21,7 +21,7 @@ public class menuBar extends JPanel {
     private JButton mealBtn;
     private JButton createWorkBtn;
     private JButton statsBtn;
-    private JButton joinClassBtn;
+    private JButton myClassesPlansBtn;
     private JButton reminderBtn;
     private JButton socialBtn;
 
@@ -93,15 +93,17 @@ public class menuBar extends JPanel {
 
             previewSearchBtn = otherFeatureBtn(" Preview Search ", new Color(200, 40, 40));
             previewSearchBtn.addActionListener(e -> {
-                // reuse Join Class page to see how it looks for users
-                if (owner instanceof ClassPage) {
+
+                if (owner instanceof TrainerProgramPreviewPage) {
                     owner.toFront();
                     owner.requestFocus();
                     return;
                 }
+
                 if (owner != null) owner.dispose();
-                new ClassPage(currentUser, db).setVisible(true);
+                new TrainerProgramPreviewPage(currentUser, db).setVisible(true);
             });
+
 
             row.add(trainerProgramsBtn);
             row.add(trainerSessionsBtn);
@@ -193,15 +195,15 @@ public class menuBar extends JPanel {
                 new StatsPage(currentUser, db).setVisible(true);
             });
 
-            joinClassBtn = otherFeatureBtn(" Join Class ", new Color(200, 40, 40));
-            joinClassBtn.addActionListener(e -> {
-                if (owner instanceof ClassPage) {
+            myClassesPlansBtn = otherFeatureBtn(" My Classes & Plans ", new Color(200, 40, 40));
+            myClassesPlansBtn.addActionListener(e -> {
+                if (owner instanceof UserProgramsPage) {
                     owner.toFront();
                     owner.requestFocus();
                     return;
                 }
                 if (owner != null) owner.dispose();
-                new ClassPage(currentUser, db).setVisible(true);
+                new UserProgramsPage(currentUser, db).setVisible(true);
             });
 
             reminderBtn = otherFeatureBtn(" Reminders ", new Color(200, 40, 40));
@@ -235,7 +237,7 @@ public class menuBar extends JPanel {
             row.add(mealBtn);
             row.add(createWorkBtn);
             row.add(statsBtn);
-            row.add(joinClassBtn);
+            row.add(myClassesPlansBtn);
             row.add(reminderBtn);
             row.add(socialBtn);
             //add(row, BorderLayout.CENTER);

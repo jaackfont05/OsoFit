@@ -3,8 +3,6 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.sql.*;
 
 public class RunSessionPage extends JFrame {
@@ -28,6 +26,9 @@ public class RunSessionPage extends JFrame {
     private JButton backBtn;
     private JButton saveBtn;
     private JButton finishBtn;
+
+    // NEW: remember current status so we know if the session is still SCHEDULED
+    private String sessionStatus;
 
     public RunSessionPage(user currentUser,
                           MySQLDatabaseConnector db,
@@ -76,7 +77,7 @@ public class RunSessionPage extends JFrame {
         center.setBorder(new EmptyBorder(8, 12, 12, 12));
         add(center, BorderLayout.CENTER);
 
-        // ---- top: basic info, left-aligned ----
+        // ---- top: basic info ----
         JPanel infoPanel = new JPanel();
         infoPanel.setBackground(defaultSettings.BACKGROUND_COLOR);
         infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
@@ -159,21 +160,21 @@ public class RunSessionPage extends JFrame {
 
         center.add(bottom, BorderLayout.SOUTH);
 
-        backBtn.addActionListener(e -> {
-            // do not change status, just close
-            dispose();
-        });
-
+        backBtn.addActionListener(e -> dispose());
         saveBtn.addActionListener(e -> saveAttendanceChanges());
-
         finishBtn.addActionListener(e -> {
             if (!saveAttendanceChanges()) return;
             markSessionCompleted();
         });
 
-        // load session + participants, and move to IN_PROGRESS if needed
+        // === IMPORTANT ORDER ===
+        // 1. Load current status/info
         loadSessionInfo();
+        // 2. If session still SCHEDULED, add new attendees from user_program
+        syncAttendanceWithNewEnrollmentsIfNeeded();
+        // 3. Possibly move session to IN_PROGRESS
         ensureInProgress();
+        // 4. Now show everyone from class_attendance
         loadParticipants();
     }
 
@@ -208,12 +209,13 @@ public class RunSessionPage extends JFrame {
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    Date d = rs.getDate("session_date");
-                    Time st = rs.getTime("start_time");
-                    Time et = rs.getTime("end_time");
+                    Date d       = rs.getDate("session_date");
+                    Time st      = rs.getTime("start_time");
+                    Time et      = rs.getTime("end_time");
                     String status = rs.getString("status");
-                    String notes = rs.getString("notes");
+                    String notes  = rs.getString("notes");
 
+                    sessionStatus = status; // NEW: remember
                     dateField.setText(d != null ? d.toString() : "");
                     startField.setText(st != null ? st.toString() : "");
                     endField.setText(et != null ? et.toString() : "");
@@ -225,6 +227,46 @@ public class RunSessionPage extends JFrame {
             ex.printStackTrace();
             JOptionPane.showMessageDialog(this,
                     "Error loading session info:\n" + ex.getMessage(),
+                    "DB Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    /**
+     * Before starting the session, make sure every enrolled user
+     * has a row in class_attendance (status REGISTERED).
+     * This catches students who registered after the session was created
+     * but before the trainer clicked "Run Session".
+     */
+    private void syncAttendanceWithNewEnrollmentsIfNeeded() {
+        if (sessionStatus == null ||
+                !sessionStatus.equalsIgnoreCase("SCHEDULED")) {
+            // only sync when still scheduled
+            return;
+        }
+
+        String sql =
+                "INSERT INTO class_attendance (session_id, user_email, status) " +
+                        "SELECT ?, up.user_email, 'REGISTERED' " +
+                        "FROM user_program up " +
+                        "WHERE up.program_id = ? " +
+                        "AND NOT EXISTS ( " +
+                        "    SELECT 1 FROM class_attendance ca " +
+                        "    WHERE ca.session_id = ? AND ca.user_email = up.user_email " +
+                        ")";
+
+        try (Connection conn = MySQLDatabaseConnector.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, sessionId);
+            ps.setInt(2, programId);
+            ps.setInt(3, sessionId);
+            ps.executeUpdate();
+
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this,
+                    "Error syncing new registrations for this session:\n" + ex.getMessage(),
                     "DB Error",
                     JOptionPane.ERROR_MESSAGE);
         }
@@ -245,7 +287,7 @@ public class RunSessionPage extends JFrame {
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
-        // refresh label from DB
+        // refresh label/status from DB
         loadSessionInfo();
         if (parentInSchedule != null) parentInSchedule.reloadSessions();
         ManageClassSessionsPage parentManage = parentInSchedule != null
@@ -270,11 +312,11 @@ public class RunSessionPage extends JFrame {
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    String email = rs.getString("user_email");
+                    String email  = rs.getString("user_email");
                     String status = rs.getString("status");
 
                     boolean attended = "ATTENDED".equalsIgnoreCase(status);
-                    boolean noShow = "NO_SHOW".equalsIgnoreCase(status);
+                    boolean noShow   = "NO_SHOW".equalsIgnoreCase(status);
 
                     model.addRow(new Object[]{
                             email,
@@ -299,19 +341,19 @@ public class RunSessionPage extends JFrame {
      */
     private boolean saveAttendanceChanges() {
         int rowCount = model.getRowCount();
+        // UPDATED: no check_in_time column in your table definition, so just update status
         String sql =
                 "UPDATE class_attendance " +
-                        "SET status=?, " +
-                        "    check_in_time = CASE WHEN ?='ATTENDED' THEN NOW() ELSE check_in_time END " +
+                        "SET status=? " +
                         "WHERE session_id=? AND user_email=?";
 
         try (Connection conn = MySQLDatabaseConnector.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             for (int i = 0; i < rowCount; i++) {
-                String email = model.getValueAt(i, 0).toString();
+                String email   = model.getValueAt(i, 0).toString();
                 Boolean attended = (Boolean) model.getValueAt(i, 1);
-                Boolean noShow = (Boolean) model.getValueAt(i, 2);
+                Boolean noShow   = (Boolean) model.getValueAt(i, 2);
 
                 if (attended == null) attended = false;
                 if (noShow == null) noShow = false;
@@ -327,12 +369,11 @@ public class RunSessionPage extends JFrame {
                 String newStatus;
                 if (attended) newStatus = "ATTENDED";
                 else if (noShow) newStatus = "NO_SHOW";
-                else newStatus = "REGISTERED"; // neither checked
+                else newStatus = "REGISTERED";
 
                 ps.setString(1, newStatus);
-                ps.setString(2, newStatus);
-                ps.setInt(3, sessionId);
-                ps.setString(4, email);
+                ps.setInt(2, sessionId);
+                ps.setString(3, email);
                 ps.addBatch();
             }
 
