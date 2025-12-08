@@ -7,10 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-/**
- * Main landing page after login.
- * Shows greeting + summary stats (calorie intake, weight, sleep).
- */
+
 public class mainPage extends JFrame {
 
     private final user currentUser;
