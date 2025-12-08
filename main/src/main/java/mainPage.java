@@ -141,11 +141,12 @@ public class mainPage extends JFrame {
             return;
         }
 
-        String sql = "SELECT calories_in, weight, sleep_hours " +
+        String sql = "SELECT calories_in, weight_pounds " +
                 "FROM Stats " +
                 "WHERE email = ? " +
-                "ORDER BY date_current DESC " +
+                "ORDER BY date_time DESC " +
                 "LIMIT 1";
+
 
         try (Connection conn = MySQLDatabaseConnector.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -155,8 +156,8 @@ public class mainPage extends JFrame {
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     caloriesIn = rs.getInt("calories_in");
-                    weight = rs.getDouble("weight");
-                    sleepHours = rs.getDouble("sleep_hours");
+                    weight = rs.getDouble("weight_pounds");
+                    //sleepHours = rs.getDouble("sleep_hours");
                     foundRow = true;
                 }
             }
