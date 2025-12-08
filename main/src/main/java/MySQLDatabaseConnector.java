@@ -435,7 +435,33 @@ public class MySQLDatabaseConnector {
             preparedStatement.setInt(4, m.calories);
             System.out.println("Saving meal: " + m.name + ", calories: " + m.calories);
             int row = preparedStatement.executeUpdate();
-            return row > 0;
+            if (row > 0) {
+                // Update or insert into Stats for calories_in
+                String findStats = "SELECT date_time, calories_in FROM Stats WHERE email = ? AND DATE(date_time) = CURDATE() ORDER BY date_time DESC LIMIT 1";
+                PreparedStatement psFind = connection.prepareStatement(findStats);
+                psFind.setString(1, u.getEmail());
+                ResultSet rs = psFind.executeQuery();
+                int newCals;
+                if (rs.next()) {
+                    Timestamp dt = rs.getTimestamp("date_time");
+                    int currentCals = rs.getInt("calories_in");
+                    newCals = currentCals + m.calories;
+                    String updateStats = "UPDATE Stats SET calories_in = ?, date_time = NOW() WHERE email = ? AND date_time = ?";
+                    PreparedStatement psUpdate = connection.prepareStatement(updateStats);
+                    psUpdate.setInt(1, newCals);
+                    psUpdate.setString(2, u.getEmail());
+                    psUpdate.setTimestamp(3, dt);
+                    psUpdate.executeUpdate();
+                } else {
+                    newCals = m.calories;
+                    String insertStats = "INSERT INTO Stats (date_time, email, calories_in, weight_pounds, steps) VALUES (NOW(), ?, ?, 0.0, 0)";
+                    PreparedStatement psInsert = connection.prepareStatement(insertStats);
+                    psInsert.setString(1, u.getEmail());
+                    psInsert.setInt(2, newCals);
+                    psInsert.executeUpdate();
+                }
+            }
+                return true;
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(null, ex.getMessage());
         }

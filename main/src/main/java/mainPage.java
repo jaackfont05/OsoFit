@@ -102,6 +102,8 @@ public class mainPage extends JFrame {
 
 
         loadLatestStatsForUser();
+
+
     }
 
 
@@ -157,7 +159,6 @@ public class mainPage extends JFrame {
                 if (rs.next()) {
                     caloriesIn = rs.getInt("calories_in");
                     weight = rs.getDouble("weight_pounds");
-                    //sleepHours = rs.getDouble("sleep_hours");
                     foundRow = true;
                 }
             }
