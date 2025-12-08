@@ -7,7 +7,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-
+/**
+ * Main landing page after login.
+ * Shows greeting + summary stats (calorie intake, weight, sleep).
+ */
 public class mainPage extends JFrame {
 
     private final user currentUser;
@@ -54,7 +57,7 @@ public class mainPage extends JFrame {
         topPanel.add(titleWrap, BorderLayout.CENTER);
         add(topPanel, BorderLayout.NORTH);
 
-        // ===== CENTER: welcome + stats cards =====
+
         String displayName = (currentUser != null
                 && currentUser.getUserN() != null
                 && !currentUser.getUserN().isBlank())
@@ -71,12 +74,12 @@ public class mainPage extends JFrame {
         welcome.setBorder(new EmptyBorder(40, 0, 20, 0));
         center.add(welcome, BorderLayout.NORTH);
 
-        //seats row
+
         JPanel statsRow = new JPanel(new GridLayout(1, 3, 30, 0));
         statsRow.setOpaque(false);
         statsRow.setBorder(new EmptyBorder(10, 80, 40, 80));
 
-        //calorie intake panel
+        // calorie intake panel
         JPanel caloriesCard = createStatCard("Calorie intake today");
         caloriesValueLbl = createStatValueLabel("0");
         caloriesCard.add(caloriesValueLbl, BorderLayout.CENTER);
@@ -97,7 +100,7 @@ public class mainPage extends JFrame {
         center.add(statsRow, BorderLayout.CENTER);
         add(center, BorderLayout.CENTER);
 
-        // Load stats from DB and push into labels
+
         loadLatestStatsForUser();
     }
 
@@ -125,7 +128,6 @@ public class mainPage extends JFrame {
         return lbl;
     }
 
-
     private void loadLatestStatsForUser() {
         // Default values if nothing in DB
         int caloriesIn = 0;
@@ -134,7 +136,7 @@ public class mainPage extends JFrame {
         boolean foundRow = false;
 
         if (currentUser == null || currentUser.getEmail() == null) {
-            // No logged in user; just show defaults
+            // No logged in user
             updateStatsLabels(caloriesIn, weight, sleepHours, false);
             return;
         }
@@ -167,7 +169,7 @@ public class mainPage extends JFrame {
         updateStatsLabels(caloriesIn, weight, sleepHours, foundRow);
     }
 
-    // Pushes values into labels
+    // pushes values into labels
     private void updateStatsLabels(int caloriesIn, double weight, double sleepHours, boolean hasData) {
         if (!hasData) {
             if (caloriesValueLbl != null) caloriesValueLbl.setText("—");
