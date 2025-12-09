@@ -7,6 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Date;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 
 public class StatsPage extends JFrame {
@@ -155,14 +156,27 @@ public class StatsPage extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    Date d = Date.valueOf(dateField.getText());
-                    Long w = Long.valueOf(weightField.getText());
+                    Date d;
+
+                    // autofill with current date if field is empty
+                    if((dateField.getText().trim()).isEmpty()){
+                        d = Date.valueOf(LocalDate.now());
+                        dateField.setText(d.toString());
+                    }
+                    else{
+                        d = Date.valueOf(dateField.getText());
+                    }
+
+                    double w = Double.valueOf(weightField.getText());
                     int s = Integer.valueOf(stepField.getText());
                     db.createStatistic(new Statistic(u.getEmail(), d, w, s), u);
                     new StatsPage(u,db).setVisible(true);
                     dispose();
                 }catch(SQLException ex){
                     System.out.println("Error inserting new statistic.");
+                }
+                catch(IllegalArgumentException ex){
+                    System.out.println("Invalid date or weight format.");
                 }
             }
         });
@@ -203,17 +217,22 @@ public class StatsPage extends JFrame {
 
         for(Statistic s : stats){
             JTextField statField = new JTextField(s.toString());
-            statField.setSize(new Dimension(100,100));
+            statField.setPreferredSize(new Dimension(statPanel.getWidth(),100));
             statField.setAlignmentX(Component.CENTER_ALIGNMENT);
             statField.setBackground(defaultSettings.BACKGROUND_COLOR);
             statField.setForeground(defaultSettings.TEXT_COLOR);
             statField.setBorder(lightBorder);
+
+            statField.setMaximumSize(new Dimension(Integer.MAX_VALUE,200));
 
             statPanel.add(statField);
             statPanel.add(Box.createVerticalStrut(10));
         }
 
         JScrollPane scrollPane = new JScrollPane(statPanel);
+        scrollPane.setBackground(defaultSettings.BACKGROUND_COLOR);
+        scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
         viewPanel.add(scrollPane);
 

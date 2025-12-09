@@ -5,8 +5,8 @@ import java.awt.*;
 
 public class MealPage extends JFrame {
     private static Meal meal;
-    private MySQLDatabaseConnector db;
-    private user u;
+    private static MySQLDatabaseConnector db;
+    private static user u;
     private static JTextField nameTf;
     private static JTextField calsTf;
 
@@ -129,7 +129,9 @@ public class MealPage extends JFrame {
                 String name = nameTf.getText();
                 int cals = Integer.parseInt(calsTf.getText());
                 meal = new Meal(name, cals);
-                JOptionPane.showMessageDialog(null, "Meal logged");
+                if(db.createMeal(meal, u)) {
+                    JOptionPane.showMessageDialog(null, "Meal logged");
+                }
                 nameTf.setText("");
                 calsTf.setText("");
             }catch(Exception ex){

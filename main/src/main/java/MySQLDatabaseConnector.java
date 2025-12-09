@@ -221,7 +221,7 @@ public class MySQLDatabaseConnector {
             PreparedStatement preparedStatement = connection.prepareStatement(query);
             preparedStatement.setString(1, u.getEmail());
             preparedStatement.setDate(2,s.getDate());
-            preparedStatement.setLong(3, s.getWeight());
+            preparedStatement.setDouble(3, s.getWeight());
             preparedStatement.setInt(4, s.getSteps());
             System.out.println("Saving statistic: " +  s.toString());
             int row = preparedStatement.executeUpdate();
@@ -243,7 +243,7 @@ public class MySQLDatabaseConnector {
             while(rs.next()) {
                 String email = rs.getString("email");
                 Date dateTime = rs.getDate("date_time");
-                Long weight = rs.getLong("weight_pounds");
+                double weight = rs.getDouble("weight_pounds");
                 int steps = rs.getInt("steps");
                 returnMe.add(new Statistic(email, dateTime, weight, steps));
             }
@@ -255,4 +255,218 @@ public class MySQLDatabaseConnector {
         return returnMe;
     }
 
+    public boolean createSleep(Sleep s, user u) {
+        String query = "INSERT INTO Sleep (email, hours, quality, date) VALUES (?, ?, ?, ?)";
+        try(Connection connection = getConnection()) {
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, u.getEmail());
+            preparedStatement.setInt(2,s.getHours());
+            preparedStatement.setInt(3, s.getQuality());
+            preparedStatement.setDate(4, s.getDate());
+            int row = preparedStatement.executeUpdate();
+            updateHourProgress(s,u);
+            return row > 0;
+        }catch(SQLException ex){
+            JOptionPane.showMessageDialog(null, ex.getMessage());
+        }
+        return false;
+    }
+
+    public ArrayList<Sleep> getSleepRecords(user u){
+        ArrayList<Sleep> returnMe = new ArrayList<>();
+        String query = "SELECT * from Sleep where email = ?";
+        try(Connection connection = getConnection()) {
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, u.getEmail());
+            ResultSet rs = preparedStatement.executeQuery();
+            while(rs.next()) {
+                String email = rs.getString("email");
+                int hours = rs.getInt("hours");
+                int quality = rs.getInt("quality");
+                Date date = rs.getDate("date");
+                returnMe.add(new Sleep(email, hours, quality, date));
+            }
+            Collections.sort(returnMe);
+        }catch(SQLException ex){
+            System.out.println("Error retrieving sleep records");
+        }
+
+        return returnMe;
+    }
+
+    public boolean deleteSleep(Sleep s, user u) throws SQLException {
+        String query = "DELETE from Sleep where email = ? and hours = ? and quality = ? and date = ?";
+        try(Connection connection = getConnection()) {
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, u.getEmail());
+            preparedStatement.setInt(2, s.getHours());
+            preparedStatement.setInt(3, s.getQuality());
+            preparedStatement.setDate(4, s.getDate());
+            System.out.println("Deleting sleep record: " +  s.toString());
+            int row = preparedStatement.executeUpdate();
+            return row > 0;
+        }catch(SQLException ex){
+            JOptionPane.showMessageDialog(null, ex.getMessage());
+        }
+        return false;
+    }
+
+    public boolean createSleepGoal(sleepGoal g, user u) {
+        String query = "INSERT INTO SleepGoals (email, totalHours, currentHours, minQuality, startDate, endDate) VALUES (?, ?, ?, ?, ?, ?)";
+        try(Connection connection = getConnection()) {
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, u.getEmail());
+            preparedStatement.setInt(2,g.getTotalHours());
+            preparedStatement.setInt(3, getHourProgress(g, u));
+            preparedStatement.setInt(4,g.getMinimumQuality());
+            preparedStatement.setDate(5,g.getStartDate());
+            preparedStatement.setDate(6,g.getEndDate());
+            int row = preparedStatement.executeUpdate();
+            return row > 0;
+        }catch(SQLException ex){
+            JOptionPane.showMessageDialog(null, ex.getMessage());
+        }
+        return false;
+    }
+
+    public int getHourProgress(sleepGoal g, user u) {
+        String query = "SELECT * FROM Sleep WHERE email = ? AND date BETWEEN ? and ?";
+        int count = 0;
+        try(Connection connection = getConnection()) {
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, u.getEmail());
+            preparedStatement.setDate(2,g.getStartDate());
+            preparedStatement.setDate(3,g.getEndDate());
+            ResultSet rs = preparedStatement.executeQuery();
+            while(rs.next()) {
+                count += rs.getInt("hours");
+            }
+        }catch(SQLException ex){
+            JOptionPane.showMessageDialog(null, ex.getMessage());
+        }
+        g.setHourProgress(count);
+        return count;
+    }
+
+    public int updateHourProgress(Sleep s, user u) {
+        ArrayList<sleepGoal> sleepGoals = getSleepGoals(u);
+        int count = 0;
+        int updatedHours;
+        for(sleepGoal sg : sleepGoals) {
+            updatedHours = getHourProgress(sg, u);
+            if((s.getDate().compareTo(sg.getStartDate()) > 1) && (s.getDate().compareTo(sg.getEndDate()) < 1)) {
+                if (s.getQuality() >= sg.getMinimumQuality()) {
+                    updatedHours += s.getHours();
+                    String query = "UPDATE sleepGoal SET currentHours = ? WHERE " +
+                            "email = ? and totalHours = ? and currentHours = ? and minQuality = ? and startDate = ? and endDate = ?";
+                    try(Connection connection = getConnection()) {
+                        PreparedStatement preparedStatement = connection.prepareStatement(query);
+                        preparedStatement.setInt(1, updatedHours);
+                        preparedStatement.setString(2, u.getEmail());
+                        preparedStatement.setInt(3, sg.getTotalHours());
+                        preparedStatement.setInt(4, sg.getMinimumQuality());
+                        preparedStatement.setDate(5,sg.getStartDate());
+                        preparedStatement.setDate(6,sg.getEndDate());
+                        ResultSet rs = preparedStatement.executeQuery();
+                        count++;
+                    }catch(SQLException ex){
+                        System.out.println("Error updating sleep records");
+                    }
+                }
+            }
+        }
+        return count;
+    }
+
+    public ArrayList<sleepGoal> getSleepGoals(user u){
+        ArrayList<sleepGoal> returnMe = new ArrayList<>();
+        String query = "SELECT * from SleepGoals where email = ?";
+        try(Connection connection = getConnection()) {
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, u.getEmail());
+            ResultSet rs = preparedStatement.executeQuery();
+            while(rs.next()) {
+                String email = rs.getString("email");
+                int totalHours = rs.getInt("totalHours");
+                int currentHours = rs.getInt("currentHours");
+                int quality = rs.getInt("minQuality");
+                Date startDate = rs.getDate("startDate");
+                Date endDate = rs.getDate("endDate");
+                returnMe.add(new sleepGoal(email, totalHours, currentHours, quality, startDate, endDate));
+            }
+            Collections.sort(returnMe);
+        }catch(SQLException ex){
+            System.out.println("Error retrieving sleep records");
+        }
+
+        return returnMe;
+    }
+
+    public boolean deleteSleepGoal(sleepGoal sg, user u) throws SQLException {
+        String query = "DELETE from SleepGoals where email = ? and totalHours = ? and currentHours = ? and minQuality = ? " +
+                "and startDate = ? and endDate = ?";
+        try(Connection connection = getConnection()) {
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, u.getEmail());
+            preparedStatement.setInt(2, sg.getTotalHours());
+            preparedStatement.setInt(3, sg.getCurrentHours());
+            preparedStatement.setInt(4, sg.getMinimumQuality());
+            preparedStatement.setDate(5,sg.getStartDate());
+            preparedStatement.setDate(6,sg.getEndDate());
+            System.out.println("Deleting reminder: " +  sg.toString());
+            int row = preparedStatement.executeUpdate();
+            System.out.println(row);
+            return row > 0;
+        }catch(SQLException ex){
+            JOptionPane.showMessageDialog(null, ex.getMessage());
+        }
+
+        return false;
+    }
+
+    //meal stuff
+    public boolean createMeal(Meal m, user u) throws SQLException {
+        String query = "INSERT INTO Meals (email, name, mealDate, calories) VALUES (?, ?, ?, ?)";
+        try (Connection connection = getConnection()) {
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, u.getEmail());
+            preparedStatement.setString(2, m.name);
+            preparedStatement.setDate(3, new java.sql.Date(System.currentTimeMillis()));
+            preparedStatement.setInt(4, m.calories);
+            System.out.println("Saving meal: " + m.name + ", calories: " + m.calories);
+            int row = preparedStatement.executeUpdate();
+            if (row > 0) {
+                // Update or insert into Stats for calories_in
+                String findStats = "SELECT date_time, calories_in FROM Stats WHERE email = ? AND DATE(date_time) = CURDATE() ORDER BY date_time DESC LIMIT 1";
+                PreparedStatement psFind = connection.prepareStatement(findStats);
+                psFind.setString(1, u.getEmail());
+                ResultSet rs = psFind.executeQuery();
+                int newCals;
+                if (rs.next()) {
+                    Timestamp dt = rs.getTimestamp("date_time");
+                    int currentCals = rs.getInt("calories_in");
+                    newCals = currentCals + m.calories;
+                    String updateStats = "UPDATE Stats SET calories_in = ?, date_time = NOW() WHERE email = ? AND date_time = ?";
+                    PreparedStatement psUpdate = connection.prepareStatement(updateStats);
+                    psUpdate.setInt(1, newCals);
+                    psUpdate.setString(2, u.getEmail());
+                    psUpdate.setTimestamp(3, dt);
+                    psUpdate.executeUpdate();
+                } else {
+                    newCals = m.calories;
+                    String insertStats = "INSERT INTO Stats (date_time, email, calories_in, weight_pounds, steps) VALUES (NOW(), ?, ?, 0.0, 0)";
+                    PreparedStatement psInsert = connection.prepareStatement(insertStats);
+                    psInsert.setString(1, u.getEmail());
+                    psInsert.setInt(2, newCals);
+                    psInsert.executeUpdate();
+                }
+            }
+                return true;
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, ex.getMessage());
+        }
+
+
+        return false;
+    }
 }

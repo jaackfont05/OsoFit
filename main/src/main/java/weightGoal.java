@@ -1,26 +1,26 @@
 // Savannah Johnson
 public class weightGoal {
-   private int currWeight;
-   private int goalWeight;
+   private double currWeight;
+   private double goalWeight;
 
-   public weightGoal(int currWeight, int goalWeight) {
+   public weightGoal(double currWeight, double goalWeight) {
        this.currWeight = currWeight;
        this.goalWeight = goalWeight;
    }
 
-   public int getCurrWeight() {
+   public double getCurrWeight() {
        return currWeight;
    }
 
-   public void setCurrWeight(int currWeight) {
+   public void setCurrWeight(double currWeight) {
        this.currWeight = currWeight;
    }
 
-   public int getGoalWeight() {
+   public double getGoalWeight() {
        return goalWeight;
    }
 
-   public void setGoalWeight(int goalWeight) {
+   public void setGoalWeight(double goalWeight) {
        this.goalWeight = goalWeight;
    }
 }
