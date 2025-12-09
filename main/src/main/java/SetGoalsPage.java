@@ -84,18 +84,6 @@ public class SetGoalsPage extends JFrame {
         weightTf.setMaximumSize(pfSize);    // prevent vertical stretching
         form.add(weightTf, fg);
 
-        //sleep row
-        fg.gridy++; fg.gridx = 0; fg.anchor = GridBagConstraints.EAST;
-        JLabel setsLbl = stdLabel("Daily sleep goal (hr):");
-        form.add(setsLbl, fg);
-
-        fg.gridx = 1; fg.anchor = GridBagConstraints.WEST;
-        setsTf = stdTextField(360);
-        setsTf.setColumns(20);
-        Dimension setsSize = setsTf.getPreferredSize();
-        setsTf.setMaximumSize(setsSize);    // prevent vertical stretching
-        form.add(setsTf, fg);
-
         //steps row
         fg.gridy++; fg.gridx = 0; fg.anchor = GridBagConstraints.EAST;
         JLabel repsLbl = stdLabel("Daily step goal:");
@@ -156,7 +144,7 @@ public class SetGoalsPage extends JFrame {
             try{
                 //int currW = Integer.parseInt(nameTf.getText());
                 int goalW = Integer.parseInt(weightTf.getText());
-                int sleep = Integer.parseInt(setsTf.getText());
+                //int sleep = Integer.parseInt(setsTf.getText());
                 int cals = Integer.parseInt(calsTf.getText());
                 int steps = Integer.parseInt(repsTf.getText());
                 JOptionPane.showMessageDialog(null, "User goals created");
