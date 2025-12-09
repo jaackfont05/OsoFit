@@ -2,6 +2,12 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import java.awt.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import static java.sql.DriverManager.getConnection;
 
 public class SetGoalsPage extends JFrame {
     public static MySQLDatabaseConnector db;
@@ -11,6 +17,7 @@ public class SetGoalsPage extends JFrame {
     private static JTextField setsTf;
     private static JTextField weightTf;
     private static JTextField repsTf;
+    private static int cal;
 
     public SetGoalsPage(MySQLDatabaseConnector db, user u) {
         this.db = db;
@@ -113,6 +120,13 @@ public class SetGoalsPage extends JFrame {
         JButton set = button();
         form.add(set, fg);
 
+
+        getStepGoal();
+        fg.gridy++; fg.gridx = 0; fg.anchor = GridBagConstraints.CENTER;
+        JLabel stepGoalLbl = stdLabel("Step goal: " + String.valueOf(cal));
+        form.add(stepGoalLbl, fg);
+
+
         column.add(form);
         column.add(Box.createVerticalStrut(16));
     }
@@ -155,5 +169,23 @@ public class SetGoalsPage extends JFrame {
             }
         });
         return b;
+    }
+
+    private void getStepGoal(){
+        String query = "SELECT steps FROM Goals WHERE email = ?";
+        try(Connection connection = db.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+
+            preparedStatement.setString(1, currentUser.getEmail());
+
+            try(ResultSet rs = preparedStatement.executeQuery()){
+                if(rs.next()){
+                    cal = rs.getInt("steps");
+                }
+            }
+
+        }catch(SQLException ex){
+            JOptionPane.showMessageDialog(null, ex.getMessage());
+        }
+
     }
 }
