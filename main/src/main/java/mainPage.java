@@ -20,6 +20,9 @@ public class mainPage extends JFrame {
     private JLabel caloriesValueLbl;
     private JLabel weightValueLbl;
     private JLabel sleepValueLbl;
+    private JLabel calorieGoalLbl;
+    private JLabel weightGoalLbl;
+    private JLabel sleepGoalLbl;
 
     public mainPage(user currentUser, MySQLDatabaseConnector db) {
         this.currentUser = currentUser;

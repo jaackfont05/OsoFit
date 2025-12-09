@@ -71,17 +71,6 @@ public class SetGoalsPage extends JFrame {
         fg.insets = new Insets(0, 12, 8, 12);
         fg.gridy = 0;
 
-        //Current weight
-        fg.gridx = 0; fg.anchor = GridBagConstraints.EAST;
-        JLabel nameLbl = stdLabel("Current weight (lb):");
-        form.add(nameLbl, fg);
-
-        fg.gridx = 1; fg.anchor = GridBagConstraints.WEST;
-        nameTf = stdTextField(360);
-        nameTf.setColumns(20);
-        Dimension tfSize = nameTf.getPreferredSize();
-        nameTf.setMaximumSize(tfSize);   // prevent vertical stretching
-        form.add(nameTf, fg);
 
         // goal weight row
         fg.gridy++; fg.gridx = 0; fg.anchor = GridBagConstraints.EAST;
@@ -165,7 +154,7 @@ public class SetGoalsPage extends JFrame {
         b.setFont(defaultSettings.LABEL_FONT);
         b.addActionListener(e -> {
             try{
-                int currW = Integer.parseInt(nameTf.getText());
+                //int currW = Integer.parseInt(nameTf.getText());
                 int goalW = Integer.parseInt(weightTf.getText());
                 int sleep = Integer.parseInt(setsTf.getText());
                 int cals = Integer.parseInt(calsTf.getText());
