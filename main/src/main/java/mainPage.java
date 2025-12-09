@@ -24,10 +24,15 @@ public class mainPage extends JFrame {
     private JLabel weightGoalLbl;
     private JLabel sleepGoalLbl;
 
+    private int calorieGoal = 0;
+    private int weightGoal = 0;
+    private int stepGoal = 0;
+
     public mainPage(user currentUser, MySQLDatabaseConnector db) {
         this.currentUser = currentUser;
         this.db = db;
 
+        getGoals();
         // Apply shared defaults (size, bg, close operation, etc.)
         defaultSettings.setDefault(this);
         setTitle("OsoFit — Main Page");
@@ -95,11 +100,24 @@ public class mainPage extends JFrame {
         caloriesCard.add(caloriesValueLbl, BorderLayout.CENTER);
         statsRow.add(caloriesCard);
 
+        JLabel cGoal = new JLabel("Calorie Goal: " + String.valueOf(calorieGoal), SwingConstants.CENTER);
+        cGoal.setForeground(defaultSettings.TEXT_COLOR);
+        cGoal.setFont(new Font("Serif", Font.BOLD, 12));
+        cGoal.setBorder(new EmptyBorder(10, 80, 40, 80));
+        caloriesCard.add(cGoal, BorderLayout.SOUTH);
+
+
         //weight panel
         JPanel weightCard = createStatCard("Current weight (lbs)");
         weightValueLbl = createStatValueLabel("--");
         weightCard.add(weightValueLbl, BorderLayout.CENTER);
         statsRow.add(weightCard);
+
+        JLabel wGoal = new JLabel("Weight Goal: " + String.valueOf(weightGoal), SwingConstants.CENTER);
+        wGoal.setForeground(defaultSettings.TEXT_COLOR);
+        wGoal.setFont(new Font("Serif", Font.BOLD, 12));
+        wGoal.setBorder(new EmptyBorder(40, 0, 20, 0));
+        weightCard.add(wGoal, BorderLayout.SOUTH);
 
         //sleep panel
         JPanel sleepCard = createStatCard("Last night's sleep (hrs)");
@@ -239,6 +257,28 @@ public class mainPage extends JFrame {
         if (sleepValueLbl != null) {
             // One decimal place for sleep hours
             sleepValueLbl.setText(String.valueOf(sleepHours));
+        }
+    }
+
+    private void getGoals(){
+
+        String goalsSql = "SELECT goalWeight, steps, calories FROM Goals WHERE email = ?";
+
+        try (Connection conn = MySQLDatabaseConnector.getConnection();
+             PreparedStatement psMeals = conn.prepareStatement(goalsSql)) {
+
+            psMeals.setString(1, currentUser.getEmail());
+
+            try (ResultSet rsMeals = psMeals.executeQuery()) {
+                if (rsMeals.next()) {
+                   weightGoal = rsMeals.getInt("goalWeight");
+                   stepGoal = rsMeals.getInt("steps");
+                   calorieGoal = rsMeals.getInt("calories");
+                }
+            }
+
+        } catch (SQLException ex) {
+            ex.printStackTrace();
         }
     }
 }
