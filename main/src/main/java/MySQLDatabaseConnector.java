@@ -470,4 +470,23 @@ public class MySQLDatabaseConnector {
 
         return false;
     }
+
+    public boolean createDailyGoal(dailyGoal g, user u){
+        String query = "INSERT INTO Goals (email, goalWeight, steps, calories) VALUES (?, ?, ?, ?)";
+        try(Connection connection = getConnection()) {
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, u.getEmail());
+            preparedStatement.setInt(2, g.getGoalWeight());
+            preparedStatement.setInt(3, g.getSteps());
+            preparedStatement.setInt(4, g.getCalories());
+            System.out.println("Adding daily goal: " +  g.toString());
+            int row = preparedStatement.executeUpdate();
+            System.out.println(row);
+            return row > 0;
+        }catch(SQLException ex){
+            JOptionPane.showMessageDialog(null, ex.getMessage());
+        }
+
+        return false;
+    }
 }

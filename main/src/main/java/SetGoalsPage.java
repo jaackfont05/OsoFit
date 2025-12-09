@@ -4,8 +4,8 @@ import javax.swing.border.LineBorder;
 import java.awt.*;
 
 public class SetGoalsPage extends JFrame {
-    public MySQLDatabaseConnector db;
-    public user currentUser;
+    public static MySQLDatabaseConnector db;
+    public static user currentUser;
     private static JTextField nameTf;
     private static JTextField calsTf;
     private static JTextField setsTf;
@@ -147,6 +147,8 @@ public class SetGoalsPage extends JFrame {
                 //int sleep = Integer.parseInt(setsTf.getText());
                 int cals = Integer.parseInt(calsTf.getText());
                 int steps = Integer.parseInt(repsTf.getText());
+
+                db.createDailyGoal(new dailyGoal(currentUser.getEmail(),goalW,steps,cals),currentUser);
                 JOptionPane.showMessageDialog(null, "User goals created");
             }catch(Exception ex){
                 JOptionPane.showMessageDialog(null, "Goals did not set");
