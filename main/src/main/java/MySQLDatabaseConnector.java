@@ -245,7 +245,8 @@ public class MySQLDatabaseConnector {
                 Date dateTime = rs.getDate("date_time");
                 double weight = rs.getDouble("weight_pounds");
                 int steps = rs.getInt("steps");
-                returnMe.add(new Statistic(email, dateTime, weight, steps));
+                if(weight != 0)
+                    returnMe.add(new Statistic(email, dateTime, weight, steps));
             }
             Collections.sort(returnMe);
         }catch(SQLException ex){
