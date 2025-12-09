@@ -12,8 +12,7 @@ public class AdminPage extends JFrame {
     private static MySQLDatabaseConnector db;
 
     private JButton resetPassBtn;
-    private JButton viewUsersBtn;
-    private JButton viewTrainersBtn;
+    private JButton addUser;
 
     private JComboBox<String> userCombo;
 
@@ -77,6 +76,9 @@ public class AdminPage extends JFrame {
         resetPassBtn = resetB();
         centerP.add(resetPassBtn, BorderLayout.SOUTH);
         add(centerP, BorderLayout.CENTER);
+
+        addUser = addUser();
+        add(addUser, BorderLayout.SOUTH);
     }
 
     private JButton resetB(){
@@ -116,6 +118,20 @@ public class AdminPage extends JFrame {
        });
 
        return res;
+    }
+
+    private JButton addUser(){
+        JButton res  = new JButton("Add Account");
+        res.setBackground(defaultSettings.BACKGROUND_COLOR);
+        res.setForeground(defaultSettings.TEXT_COLOR);
+        res.setFont(defaultSettings.TITLE_FONT);
+
+        res.addActionListener(e -> {
+            this.dispose();
+            new createAccountPage(db).setVisible(true);
+        });
+
+        return res;
     }
 
 
