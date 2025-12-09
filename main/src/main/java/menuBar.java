@@ -239,7 +239,7 @@ public class menuBar extends JPanel {
             row.add(statsBtn);
             row.add(myClassesPlansBtn);
             row.add(reminderBtn);
-            row.add(socialBtn);
+            //row.add(socialBtn);
             //add(row, BorderLayout.CENTER);
         }
         add(row, BorderLayout.CENTER);

@@ -141,7 +141,7 @@ public class mainPage extends JFrame {
         // Default values if nothing in DB
         int caloriesIn = 0;
         double weight = 0.0;
-        double sleepHours = 0.0;
+        int sleepHours = 0;
         boolean foundRow = false;
 
         if (currentUser == null || currentUser.getEmail() == null) {
@@ -150,28 +150,67 @@ public class mainPage extends JFrame {
             return;
         }
 
-        String sql = "SELECT calories_in, weight_pounds " +
+        String mealsSql = "SELECT SUM(calories) AS total_calories, COUNT(*) AS meal_count " +
+                "FROM Meals " +
+                "WHERE email = ? AND mealDate = (SELECT MAX(mealDate) FROM Meals WHERE email = ?)";
+
+        try (Connection conn = MySQLDatabaseConnector.getConnection();
+             PreparedStatement psMeals = conn.prepareStatement(mealsSql)) {
+
+            psMeals.setString(1, currentUser.getEmail());
+            psMeals.setString(2, currentUser.getEmail());
+
+            try (ResultSet rsMeals = psMeals.executeQuery()) {
+                if (rsMeals.next()) {
+                    int mealCount = rsMeals.getInt("meal_count");
+                    if (mealCount > 0) {
+                        caloriesIn = rsMeals.getInt("total_calories");
+                       foundRow = true;
+                    }
+                }
+            }
+
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+
+
+        String statsSql = "SELECT weight_pounds " +
                 "FROM Stats " +
                 "WHERE email = ? " +
                 "ORDER BY date_time DESC " +
                 "LIMIT 1";
 
-
         try (Connection conn = MySQLDatabaseConnector.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+             PreparedStatement psStats = conn.prepareStatement(statsSql)) {
 
-            ps.setString(1, currentUser.getEmail());
+            psStats.setString(1, currentUser.getEmail());
 
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    caloriesIn = rs.getInt("calories_in");
-                    weight = rs.getDouble("weight_pounds");
-                    foundRow = true;
+            try (ResultSet rsStats = psStats.executeQuery()) {
+                if (rsStats.next()) {
+                    weight = rsStats.getDouble("weight_pounds");
                 }
             }
 
         } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
 
+        String sleepSql = "SELECT hours FROM Sleep WHERE email = ? AND date = (SELECT MAX(date) FROM Sleep WHERE email = ?)";
+
+        try (Connection conn = MySQLDatabaseConnector.getConnection();
+             PreparedStatement psStats = conn.prepareStatement(sleepSql)) {
+
+            psStats.setString(1, currentUser.getEmail());
+            psStats.setString(2, currentUser.getEmail());
+
+            try (ResultSet rsStats = psStats.executeQuery()) {
+                if (rsStats.next()) {
+                    sleepHours = rsStats.getInt("hours");
+                }
+            }
+
+        } catch (SQLException ex) {
             ex.printStackTrace();
         }
 
@@ -179,7 +218,7 @@ public class mainPage extends JFrame {
     }
 
     // pushes values into labels
-    private void updateStatsLabels(int caloriesIn, double weight, double sleepHours, boolean hasData) {
+    private void updateStatsLabels(int caloriesIn, double weight, int sleepHours, boolean hasData) {
         if (!hasData) {
             if (caloriesValueLbl != null) caloriesValueLbl.setText("—");
             if (weightValueLbl != null)    weightValueLbl.setText("—");
@@ -196,7 +235,7 @@ public class mainPage extends JFrame {
         }
         if (sleepValueLbl != null) {
             // One decimal place for sleep hours
-            sleepValueLbl.setText(String.format("%.1f", sleepHours));
+            sleepValueLbl.setText(String.valueOf(sleepHours));
         }
     }
 }
