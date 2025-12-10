@@ -6,6 +6,8 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.*;
+import java.time.LocalDate;
+
 
 public class UserTodaySessionsPage extends JFrame {
 
@@ -143,13 +145,17 @@ public class UserTodaySessionsPage extends JFrame {
                         "JOIN user_program up ON up.program_id = ep.program_id " +
                         "JOIN users u ON ep.trainer_email = u.email " +
                         "WHERE up.user_email = ? " +
-                        "  AND cs.session_date = CURDATE() " +
+                        "  AND cs.session_date = ? " +
                         "ORDER BY cs.start_time";
 
         try (Connection conn = MySQLDatabaseConnector.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, currentUser.getEmail());
+
+            // Use local “today” from Java instead of MySQL CURDATE()
+            java.sql.Date today = java.sql.Date.valueOf(LocalDate.now());
+            ps.setDate(2, today);
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -183,6 +189,7 @@ public class UserTodaySessionsPage extends JFrame {
                     JOptionPane.ERROR_MESSAGE);
         }
     }
+
 
     private void openSelectedSessionDetail() {
         int row = sessionsTable.getSelectedRow();
